@@ -25,7 +25,7 @@ from KENG_64QAM_LogicTx import *
 from Equalizer import *
 from Phaserecovery import *
 
-address = r'data\KENG_optsim_py\20210322_DATA_ShortTime\300KLW_0GFO_50GBW_0dBLO_sample32_500ns_CD640_EDC0_TxO-2dBm_RxO-08dBm_OSNR60dB_LO00dBm/'
+address = r'G:\我的雲端硬碟\OptsimData_coherent\QAM64_data\20210322_DATA_ShortTime\100KLW_0GFO_50GBW_0dBLO_sample32_500ns_CD0_EDC0_TxO-2dBm_RxO-08dBm_OSNR60dB_LO00dBm/'
 Imageaddress = address + 'image'
 parameter = Parameter(address, simulation=True)
 # open_excel(address)
