@@ -1024,8 +1024,8 @@ class CMA_single:
         self.center = int((self.cmataps - 1) / 2)
         self.iterator = iter
         self.earlystop = 0.001
-        self.stepsizeadjust = 0.9
-        self.stepsize = self.stepsizelist[9]  # 320,0 [4]
+        self.stepsizeadjust = 0.95
+        self.stepsize = self.stepsizelist[9]
         self.stepsize_x = self.stepsize
         self.stepsize_y = self.stepsize
 
@@ -1589,7 +1589,7 @@ class CMA_single:
         endtime = datetime.datetime.now()
         print(endtime - starttime)
 
-    def qam_4_side_RD_polarization(self):  # A FAMILY OF ALGORITHMS FOR BLIND EQUALIZATION OF QAM SIGNALS
+    def qam_4_side_RD_polarization(self, stage = 1):  # A FAMILY OF ALGORITHMS FOR BLIND EQUALIZATION OF QAM SIGNALS
         starttime = datetime.datetime.now()
         self.type = 'single_side_RD_polarization'
         self.costfunx = np.zeros((1, self.iterator), dtype="complex_")
@@ -1603,9 +1603,12 @@ class CMA_single:
         epsilon_lambda = 0.1  # forgetting factor
         epsilon = 2  # initial
 
-        radius = [2 ** 0.5, 10 ** 0.5, 18 ** 0.5, 26 ** 0.5, 34 ** 0.5, 50 ** 0.5, 58 ** 0.5, 74 ** 0.5, 98 ** 0.5]
-        # radius = [10 ** 0.5, 50 ** 0.5, 98 ** 0.5]
-        # radius = [50 ** 0.5]
+        if stage == 3:
+            radius = [2 ** 0.5, 10 ** 0.5, 18 ** 0.5, 26 ** 0.5, 34 ** 0.5, 50 ** 0.5, 58 ** 0.5, 74 ** 0.5, 98 ** 0.5]
+        elif stage == 2:
+            radius = [10 ** 0.5, 50 ** 0.5, 98 ** 0.5]
+        elif stage == 1:
+            radius = [50 ** 0.5]
 
         HardDecision_X = np.zeros(len(radius))
 
@@ -1651,7 +1654,7 @@ class CMA_single:
                 #         self.costfunx[0][it]:
                 #     print("Earlybreak at iterator {}".format(it))
                 #     break
-                if np.abs(self.costfunx[0][it] - self.costfunx[0][it - 1]) < (self.earlystop * 100):
+                if np.abs(self.costfunx[0][it] - self.costfunx[0][it - 1]) < (self.earlystop * 50):
                     self.stepsize_x *= self.stepsizeadjust
                     print('Stepsize_x adjust to {}'.format(self.stepsize_x))
             #     if np.abs(self.costfuny[0][it] - self.costfuny[0][it - 1]) < self.earlystop:

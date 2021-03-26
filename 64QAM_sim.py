@@ -25,7 +25,7 @@ from KENG_64QAM_LogicTx import *
 from Equalizer import *
 from Phaserecovery import *
 
-address = r'G:\我的雲端硬碟\OptsimData_coherent\QAM64_data\20210322_DATA_ShortTime\100KLW_0GFO_50GBW_0dBLO_sample32_500ns_CD0_EDC0_TxO-2dBm_RxO-08dBm_OSNR60dB_LO00dBm/'
+address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data\20210322_DATA_ShortTime\300KLW_0GFO_50GBW_0dBLO_sample32_500ns_CD320_EDC0_TxO-2dBm_RxO-08dBm_OSNR60dB_LO00dBm/'
 Imageaddress = address + 'image'
 parameter = Parameter(address, simulation=True)
 # open_excel(address)
@@ -35,18 +35,6 @@ Tx2Bit = KENG_Tx2Bit(PAM_order=parameter.pamorder)
 downsample_Tx = KENG_downsample(down_coeff=parameter.resamplenumber)
 downsample_Rx = KENG_downsample(down_coeff=parameter.resamplenumber)
 window_length = 7000
-
-# Tx_XI, Tx_XQ = DataNormalize(parameter.TxXI ,parameter.TxXQ ,parameter.pamorder)
-# Tx_YI, Tx_YQ = DataNormalize(parameter.TxYI ,parameter.TxYQ ,parameter.pamorder)
-# parameter.TxXI = np.array(parameter.TxXI)
-# parameter.TxXQ = np.array(parameter.TxXQ)
-# parameter.TxYI = np.array(parameter.TxYI)
-# parameter.TxYQ = np.array(parameter.TxYQ)
-#
-# Tx_XI = Tx2Bit.return_Tx(parameter.TxXI)
-# Tx_XQ = Tx2Bit.return_Tx(parameter.TxXQ)
-# Tx_YI = Tx2Bit.return_Tx(parameter.TxYI)
-# Tx_YQ = Tx2Bit.return_Tx(parameter.TxYQ)
 
 Rx_XI, Rx_XQ = DataNormalize(parameter.RxXI, parameter.RxXQ, parameter.pamorder)
 Rx_YI, Rx_YQ = DataNormalize(parameter.RxYI, parameter.RxYQ, parameter.pamorder)
@@ -64,34 +52,31 @@ XSNR, XEVM, YSNR, YEVM = np.zeros(parameter.resamplenumber), np.zeros(parameter.
 #         Rx_Signal_X [8*j + k] = Decision[j] + 1j * Decision[k]
 # Rx_Signal_X = np.tile(Rx_Signal_X,100)
 
+LogTxXI_LSB = downsample_Tx.return_value(parameter.LogTxXI_LSB)
+LogTxXI_CSB = downsample_Tx.return_value(parameter.LogTxXI_CSB)
+LogTxXI_MSB = downsample_Tx.return_value(parameter.LogTxXI_MSB)
+
+LogTxXQ_LSB = downsample_Tx.return_value(parameter.LogTxXQ_LSB)
+LogTxXQ_CSB = downsample_Tx.return_value(parameter.LogTxXQ_CSB)
+LogTxXQ_MSB = downsample_Tx.return_value(parameter.LogTxXQ_MSB)
+
+LogTxYI_LSB = downsample_Tx.return_value(parameter.LogTxYI_LSB)
+LogTxYI_CSB = downsample_Tx.return_value(parameter.LogTxYI_CSB)
+LogTxYI_MSB = downsample_Tx.return_value(parameter.LogTxYI_MSB)
+
+LogTxYQ_LSB = downsample_Tx.return_value(parameter.LogTxYQ_LSB)
+LogTxYQ_CSB = downsample_Tx.return_value(parameter.LogTxYQ_CSB)
+LogTxYQ_MSB = downsample_Tx.return_value(parameter.LogTxYQ_MSB)
+
+TxXI, TxXQ = QAM64_LogicTx(LogTxXI_LSB, LogTxXI_CSB, LogTxXI_MSB, LogTxXQ_LSB, LogTxXQ_CSB, LogTxXQ_MSB)
+TxYI, TxYQ = QAM64_LogicTx(LogTxYI_LSB, LogTxYI_CSB, LogTxYI_MSB, LogTxYQ_LSB, LogTxYQ_CSB, LogTxYQ_MSB)
+# Tx_Signal_X = TxXI + 1j * TxXQ
+# Tx_Signal_Y = TxYI + 1j * TxYQ
+# Histogram2D('Tx_X_normalized', Tx_Signal_X, Imageaddress)
+# Histogram2D('Tx_X_normalized', Tx_Signal_Y, Imageaddress)
+
 for eyepos in range(25,26):
     down_num = eyepos
-
-    LogTxXI_LSB = downsample_Tx.return_value(parameter.LogTxXI_LSB)
-    LogTxXI_CSB = downsample_Tx.return_value(parameter.LogTxXI_CSB)
-    LogTxXI_MSB = downsample_Tx.return_value(parameter.LogTxXI_MSB)
-
-    LogTxXQ_LSB = downsample_Tx.return_value(parameter.LogTxXQ_LSB)
-    LogTxXQ_CSB = downsample_Tx.return_value(parameter.LogTxXQ_CSB)
-    LogTxXQ_MSB = downsample_Tx.return_value(parameter.LogTxXQ_MSB)
-
-    LogTxYI_LSB = downsample_Tx.return_value(parameter.LogTxYI_LSB)
-    LogTxYI_CSB = downsample_Tx.return_value(parameter.LogTxYI_CSB)
-    LogTxYI_MSB = downsample_Tx.return_value(parameter.LogTxYI_MSB)
-
-    LogTxYQ_LSB = downsample_Tx.return_value(parameter.LogTxYQ_LSB)
-    LogTxYQ_CSB = downsample_Tx.return_value(parameter.LogTxYQ_CSB)
-    LogTxYQ_MSB = downsample_Tx.return_value(parameter.LogTxYQ_MSB)
-
-    TxXI, TxXQ = QAM64_LogicTx(LogTxXI_LSB, LogTxXI_CSB, LogTxXI_MSB, LogTxXQ_LSB, LogTxXQ_CSB, LogTxXQ_MSB)
-    TxYI, TxYQ = QAM64_LogicTx(LogTxYI_LSB, LogTxYI_CSB, LogTxYI_MSB, LogTxYQ_LSB, LogTxYQ_CSB, LogTxYQ_MSB)
-    # Tx_Signal_X = TxXI + 1j * TxXQ
-    # Tx_Signal_Y = TxYI + 1j * TxYQ
-
-    # Histogram2D('Tx_X_normalized', Tx_Signal_X, Imageaddress)
-    # Histogram2D('Tx_X_normalized', Tx_Signal_Y, Imageaddress)
-
-
     # TxXI = downsample_Tx.return_value(Tx_XI[down_num:])
     # TxXQ = downsample_Tx.return_value(Tx_XQ[down_num:])
     # TxYI = downsample_Tx.return_value(Tx_YI[down_num:])
@@ -126,7 +111,7 @@ for eyepos in range(25,26):
     # Rx_Y_iqimba = IQimbaCompensator(Rx_Signal_Y, 1e-4)
     # Histogram2D("IQimba", Rx_X_iqimba[0])
     ##########IQimba################
-    tap_start, tap_end = 43, 45
+    tap_start, tap_end = 35,37
     for taps in range(tap_start, tap_end, 2):
         print("eye : {} ,tap : {}".format(eyepos,taps))
         # Rx_Signal_X_mat = sio.loadmat('RxX_mat.mat')
@@ -137,7 +122,7 @@ for eyepos in range(25,26):
         # Rx_Signal_Y = np.reshape(Rx_Signal_Y_mat, -1)
 
         cma = CMA_single(Rx_Signal_X, Rx_Signal_Y, taps=taps, iter=40, mean=0)
-        # aa = cma.ConstModulusAlgorithm(Rx_Signal_X , taps, 1e-6,4 , 10)
+        # aa = cma.ConstModulusAlgorithm(Rx_Signal_X , taps, 1e-6,4 ,
 
         # cma.qam_4_butter_real()
         # cma.qam_4_butter_real_shift()
@@ -152,39 +137,42 @@ for eyepos in range(25,26):
         # cma.qam_4_side_conj_SBD_polarization()
         # cma.qam_4_side_conj_MRD_polarization()
         # cma.qam_4_side_conj_RMA_polarization()
-        cma.qam_4_side_RD_polarization()
+        cma.qam_4_side_RD_polarization(stage=1)
         # cma.MCMA_SBD()
 
         Rx_X_CMA_stage1 = cma.rx_x_cma[cma.rx_x_cma != 0]
         Histogram2D('CMA_X_{}_stage1 taps={} {}'.format(eyepos, cma.cmataps, cma.type),
                     Rx_X_CMA_stage1, Imageaddress)
+        Rx_X_CMA = Rx_X_CMA_stage1
 
-        cma = CMA_single(Rx_X_CMA_stage1, Rx_Signal_Y, taps=taps, iter=40, mean=0)
-        cma.qam_4_side_RD_polarization()
+        cma = CMA_single(Rx_X_CMA_stage1, Rx_Signal_Y, taps=61, iter=80, mean=0)
+        cma.qam_4_side_RD_polarization(stage=2)
         Rx_X_CMA_stage2 = cma.rx_x_cma[cma.rx_x_cma != 0]
         Histogram2D('CMA_X_{}_stage2 taps={} {}'.format(eyepos, cma.cmataps, cma.type),
                     Rx_X_CMA_stage2, Imageaddress)
+        Rx_X_CMA = Rx_X_CMA_stage2
 
-        cma = CMA_single(Rx_X_CMA_stage2, Rx_Signal_Y, taps=taps, iter=40, mean=0)
-        cma.qam_4_side_RD_polarization()
+
+        cma = CMA_single(Rx_X_CMA_stage2, Rx_Signal_Y, taps=61, iter=40, mean=0)
+        cma.qam_4_side_RD_polarization(stage = 3)
         Rx_X_CMA_stage3 = cma.rx_x_cma[cma.rx_x_cma != 0]
         Histogram2D('CMA_X_{}_stage3 taps={} {}'.format(eyepos, cma.cmataps, cma.type),
                     Rx_X_CMA_stage3, Imageaddress)
-
-
         Rx_X_CMA = Rx_X_CMA_stage3
 
 
         # Rx_X_CMA, Rx_Y_CMA = Downsample(cma.rx_x_cma, n, cma.center), Downsample(cma.rx_y_cma, n, cma.center)
         # Rx_X_CMA = cma.rx_x_cma[cma.rx_x_cma != 0]
         # Rx_Y_CMA = cma.rx_y_cma[cma.rx_y_cma != 0]
-        Histogram2D('CMA_X_{} taps={} {}'.format(eyepos, cma.cmataps, cma.type),
-                    Rx_X_CMA, Imageaddress)
+        # Histogram2D('CMA_X_{} taps={} {}'.format(eyepos, cma.cmataps, cma.type),
+        #             Rx_X_CMA, Imageaddress)
         # Histogram2D('CMA_Y_{} taps={} {}'.format(eyepos, cma.cmataps, cma.type),
         #             Rx_Y_CMA, Imageaddress)
 
-        CMA_cost_X = np.round(cma.costfunx[0][-1], 5)
+        # CMA_cost_X = np.round(cma.costfunx[0][-1], 5)
         # CMA_cost_Y = np.round(cma.costfuny[0][-1], 5)
+        CMA_cost_X = 0
+        CMA_cost_Y = 0
         # print("cost :", CMA_cost_X, CMA_cost_Y)
         # --------------
         #--------------------------- X PART------------------------
@@ -195,6 +183,7 @@ for eyepos in range(25,26):
         Histogram2D('KENG_FOcompensate_X', FOcompen_X, Imageaddress)
 
         DDPLL_RxX = ph.PLL(FOcompen_X)
+        PLL_BW = ph.bandwidth
         Histogram2D('KENG_FreqOffset_X', DDPLL_RxX[0, :], Imageaddress)
 
         phasenoise_RxX = np.reshape(DDPLL_RxX, -1)
@@ -222,6 +211,14 @@ for eyepos in range(25,26):
         bercount_X = BERcount(np.array(TxX_corr), np.array(RxX_corr), parameter.pamorder)
         print('BER_X = {} \nSNR_X = {} \nEVM_X = {}'.format(bercount_X, SNR_X, EVM_X))
         XSNR[eyepos] ,XEVM[eyepos] = SNR_X, EVM_X
+
+        # print('----------------write excel----------------')
+        # parameter_record = [eyepos, str(
+        #     [cma.mean, cma.type, cma.overhead * 100, cma.cmataps, cma.stepsize, cma.iterator, cma.earlystop,
+        #      cma.stepsizeadjust]), str([CMA_cost_X, CMA_cost_Y]),
+        #                     PLL_BW, str([(XIshift, XQshift), (XI_corr, XQ_corr)]), str([SNR_X, EVM_X, bercount_X])]
+        #
+        # write_excel(address, parameter_record)
 
         print('================================')
         print('Y part')
@@ -287,8 +284,8 @@ for eyepos in range(25,26):
     # np.save(address + 'XSNR', XSNR)
     # np.save(address + 'YSNR', YSNR)
 # ===========================================volterra=========================================================
-equalizer_real = Equalizer(np.real(np.array(TxX_corr)), np.real(np.array(RxX_corr)), 3, [31, 31, 31], 0.5)
-equalizer_imag = Equalizer(np.imag(np.array(TxX_corr)), np.imag(np.array(RxX_corr)), 3, [31, 31, 31], 0.5)
+equalizer_real = Equalizer(np.real(np.array(TxX_corr)), np.real(np.array(RxX_corr)), 3, [31, 31, 31], 0.4)
+equalizer_imag = Equalizer(np.imag(np.array(TxX_corr)), np.imag(np.array(RxX_corr)), 3, [31, 31, 31], 0.4)
 Tx_volterra_real, Rx_volterra_real = equalizer_real.realvolterra()
 Tx_volterra_imag, Rx_volterra_imag = equalizer_imag.realvolterra()
 Tx_real_volterra = Tx_volterra_real + 1j * Tx_volterra_imag
@@ -306,12 +303,12 @@ print("BERcount_realvol : {}".format(realvol_bercount))
 #
 # write_excel(address, parameter_record)
 # ------
-equalizer_complex = Equalizer(np.array(TxX_corr), np.array(RxX_corr), 3, [31, 25, 25], 0.1)
+equalizer_complex = Equalizer(np.array(TxX_corr), np.array(RxX_corr), 3, [31, 25, 25], 0.75)
 Tx_complex_volterra, Rx_complex_volterra = equalizer_complex.complexvolterra()
 
 snr_complexvolterra, evm_complexvolterra = SNR(Tx_complex_volterra, Rx_complex_volterra)
 print("SNR_cmplvol : {}, EVM_cmplvol : {}".format(snr_complexvolterra, evm_complexvolterra))
-# Histogram2D("complexVolterra", Rx_complex_volterra, Imageaddress, snr_complexvolterra, evm_complexvolterra)
+Histogram2D("complexVolterra", Rx_complex_volterra, Imageaddress, snr_complexvolterra, evm_complexvolterra)
 
 compvol_bercount = BERcount(Tx_complex_volterra, Rx_complex_volterra, parameter.pamorder)
 print("BERcount_cmplvol : {}".format(compvol_bercount))

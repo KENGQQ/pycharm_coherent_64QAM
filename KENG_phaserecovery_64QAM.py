@@ -94,7 +94,7 @@ class KENG_phaserecovery:
                 Rx_zeropad[i] = Rx[i]
 
         a = KENG_phaserecovery()
-        Rx_vv = a.forth_QPSK(Rx_zeropad, tap = 61)
+        Rx_vv = a.forth_QPSK(Rx_zeropad, tap = 151)
         phase1 = a.phase_adj
 
         Rx_ph = np.zeros(int(np.size(phase1)), dtype='complex_')
@@ -150,7 +150,6 @@ class KENG_phaserecovery:
             for j in range(1, 6):
                 if radius_o[j - 1] <= abs(Rx_RA[i]) < radius_o[j]:
                     Rx_RA[i] = Rx_RA[i] * np.exp(4j * c_theta[j - 1] * np.sign(np.imag(Rx_RA[i])))
-                    # aaa.remove(i)
                     break
 
         for i in range(len(Rx_RA)):
@@ -167,7 +166,7 @@ class KENG_phaserecovery:
                     break
 
         a = KENG_phaserecovery()
-        Rx_vv = a.first_QPSK(Rx_RA, tap = 61)
+        Rx_vv = a.first_QPSK(Rx_RA, tap = 201)
         phase1 = a.phase_adj
 
         Rx_ph = np.zeros(int(np.size(phase1)), dtype='complex_')
@@ -523,7 +522,7 @@ class KENG_phaserecovery:
 
     def PLL(self, isig):
         self.isig = isig
-        self.bandwidth = 1e-3
+        self.bandwidth = 2e-3
         dampingfactor = 1430.707
 
         theta = self.bandwidth / (dampingfactor + 1 / (4 * dampingfactor))
