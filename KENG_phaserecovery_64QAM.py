@@ -74,27 +74,34 @@ class KENG_phaserecovery:
 
         return PLL_Rx
 
-    def QAM_64QAM_1(self, Rx):
-        c1_radius_i = 0
-        c1_radius_o = 1.55
-        c3_radius_i = 3.2
-        c3_radius_o = 4
-        c9_radius_i = 8.2
-        c9_radius_o = 10.2
+    def QAM_64QAM_1(self, Rx, r1_o, r3_i, r3_o, r9_i):
+        # self.c1_radius_i = 0
+        # self.c1_radius_o = 1.55
+        # self.c3_radius_i = 3.2
+        # self.c3_radius_o = 4
+        # self.c9_radius_i = 8.2
+        # self.c9_radius_o = 12
+        self.c1_radius_i = 0
+        self.c1_radius_o = r1_o
+        self.c3_radius_i = r3_i
+        self.c3_radius_o = r3_o
+        self.c9_radius_i = r9_i
+        self.c9_radius_o = 12
+        self.tap = 201
 
         Rx_amplitude = np.abs(Rx)
         Rx_zeropad = np.zeros(len(Rx), dtype = "complex_")
 
         for i in range(len(Rx_zeropad)):
-            if (c1_radius_i <= Rx_amplitude[i]) and (Rx_amplitude[i] < c1_radius_o):
+            if (self.c1_radius_i <= Rx_amplitude[i]) and (Rx_amplitude[i] < self.c1_radius_o):
                 Rx_zeropad[i] = Rx[i]
-            if (c3_radius_i <= Rx_amplitude[i]) and (Rx_amplitude[i] < c3_radius_o):
+            if (self.c3_radius_i <= Rx_amplitude[i]) and (Rx_amplitude[i] < self.c3_radius_o):
                 Rx_zeropad[i] = Rx[i]
-            if (c9_radius_i <= Rx_amplitude[i]) and (Rx_amplitude[i] < c9_radius_o):
+            if (self.c9_radius_i <= Rx_amplitude[i]) and (Rx_amplitude[i] < self.c9_radius_o):
                 Rx_zeropad[i] = Rx[i]
 
         a = KENG_phaserecovery()
-        Rx_vv = a.forth_QPSK(Rx_zeropad, tap = 151)
+        Rx_vv = a.forth_QPSK(Rx_zeropad, tap = self.tap)
         phase1 = a.phase_adj
 
         Rx_ph = np.zeros(int(np.size(phase1)), dtype='complex_')

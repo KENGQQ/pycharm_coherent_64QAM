@@ -14,7 +14,7 @@ class Parameter:
             self.samplepersymbol = self.sampleRate / self.symbolRate
             self.resamplenumber = int(self.samplepersymbol * self.upsamplenum)
             self.datafolder=datafolder
-            time=500
+            time=2000
             # self.RxXI = pd.read_table(self.datafolder + 'RxXI.txt', names=['RxXI'])['RxXI'].tolist()
             # self.RxXQ = pd.read_table(self.datafolder + 'RxXQ.txt', names=['RxXQ'])['RxXQ'].tolist()
             # self.RxYI = pd.read_table(self.datafolder + 'RxYI.txt', names=['RxYI'])['RxYI'].tolist()
@@ -33,7 +33,9 @@ class Parameter:
             # self.TxYQ = np.mat(pd.read_table(self.datafolder + 'TxYQ.txt', names=['TxYQ'])['TxYQ'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
 
 
-            self.datafolder = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data\20210322_DATA_ShortTime/'
+            # self.datafolder = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data\20210322_DATA_ShortTime/'
+            self.datafolder = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
+            self.datafolder += '20210307_DATA_base/'
             self.LogTxXI_LSB=pd.read_table(self.datafolder+'LogTxXI_LSB.txt',names=['L1'])['L1'].tolist()
             self.LogTxXI_CSB=pd.read_table(self.datafolder+'LogTxXI_CSB.txt',names=['L1'])['L1'].tolist()
             self.LogTxXI_MSB=pd.read_table(self.datafolder+'LogTxXI_MSB.txt',names=['L1'])['L1'].tolist()

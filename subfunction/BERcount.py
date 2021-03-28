@@ -71,27 +71,40 @@ def BERcount(tg, pred,PAM_order):
                     # print(indx)
 
 
+    # if PAM_order == 8:
+    #     constellation_point = [-7, -5, -3, -1, 1, 3, 5, 7]
+    #     l = 0
+    #     for k in range(len(pred)):
+    #         for i in range(len(constellation_point)):
+    #             for j in range(len(constellation_point)):
+    #                 if constellation_point[i] + 1 > np.real(pred[k]) > constellation_point[i] - 1:
+    #                     if constellation_point[j] + 1 > np.imag(pred[k]) > constellation_point[j] - 1:
+    #                         l += 1
+    #                         if (tg[k] != constellation_point[i] + 1j * constellation_point[j]):
+    #                             error += 1
+    #
+    #                             break
+    #                         break
     if PAM_order == 8:
         constellation_point = [-7, -5, -3, -1, 1, 3, 5, 7]
-        l = 0
+        constellation_boundary =  [-100, -6, -4, -2, 0, 2, 4, 6, 100]
         for k in range(len(pred)):
-            for i in range(len(constellation_point)):
-                for j in range(len(constellation_point)):
-                    if constellation_point[i] + 1 > np.real(pred[k]) > constellation_point[i] - 1:
-                        if constellation_point[j] + 1 > np.imag(pred[k]) > constellation_point[j] - 1:
-                            l += 1
+            for i in range(len(constellation_boundary) - 1):
+                for j in range(len(constellation_boundary) - 1):
+                    if constellation_boundary[i] < np.real(pred[k]) < constellation_boundary[i + 1]:
+                        if constellation_boundary[j] < np.imag(pred[k]) < constellation_boundary[j + 1]:
                             if (tg[k] != constellation_point[i] + 1j * constellation_point[j]):
                                 error += 1
 
                                 break
                             break
 
-
-    # BER = error / len(tg)
-    # print(len(tg))
-    # print(error)
-
-    BER = error / l
-    print(l)
+    BER = error / len(tg)
+    BER = np.round(BER, 5)
+    print(len(tg))
     print(error)
+
+    # BER = error / l
+    # print(l)
+    # print(error)
     return BER
