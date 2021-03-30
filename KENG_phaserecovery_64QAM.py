@@ -583,7 +583,7 @@ class KENG_phaserecovery:
         if maxIndex > Nfft / 2:
             maxIndex = maxIndex - Nfft
         estFreqOffset = fs / Nfft * (maxIndex - 1) / m_order;
-        print('Frequency offset=', estFreqOffset)
+        print('Frequency offset={} GHz'.format(estFreqOffset/ 1e9))
         rx = rx * np.exp(-estFreqOffset * np.linspace(1, N, N) * 2 * np.pi * 1j / fs)
         # rx = rx * np.exp(estFreqOffset * np.linspace(1, N, N) * 2 * np.pi * 1j / fs)
 
