@@ -27,7 +27,7 @@ from Phaserecovery import *
 
 # address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
 address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
-folder = '20210307_DATA_base/300KLW_1GFO_50GBW_0dBLO_sample32_2000ns_CD1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR60dB_LO00dBm/'
+folder = '20210307_DATA_base/500KLW_1GFO_50GBW_0dBLO_sample32_2000ns_CD1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm/'
 address += folder
 
 Imageaddress = address + 'image'
@@ -84,7 +84,7 @@ TxYI, TxYQ = QAM64_LogicTx(LogTxYI_LSB, LogTxYI_CSB, LogTxYI_MSB, LogTxYQ_LSB, L
 # Histogram2D('Tx_X_normalized', Tx_Signal_Y, Imageaddress)
 
 eyestart, eyeend = 0,32
-for eyepos in range(eyestart, eyeend, 2):
+for eyepos in range(eyestart, eyeend, 1):
     down_num = eyepos
     # TxXI = downsample_Tx.return_value(Tx_XI[down_num:])
     # TxXQ = downsample_Tx.return_value(Tx_XQ[down_num:])
@@ -130,7 +130,7 @@ for eyepos in range(eyestart, eyeend, 2):
         # Rx_Signal_Y_mat = Rx_Signal_Y_mat['rxSym']
         # Rx_Signal_Y = np.reshape(Rx_Signal_Y_mat, -1)
 
-        cma = CMA_single(Rx_Signal_X, Rx_Signal_Y, taps=taps, iter=120, mean=0)
+        cma = CMA_single(Rx_Signal_X, Rx_Signal_Y, taps=taps, iter=100, mean=0)
         # aa = cma.ConstModulusAlgorithm(Rx_Signal_X , taps, 1e-6,4 ,
 
         # cma.qam_4_butter_real()
