@@ -33,7 +33,7 @@ class Parameter:
             # self.TxYQ = np.mat(pd.read_table(self.datafolder + 'TxYQ.txt', names=['TxYQ'])['TxYQ'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
 
 
-            # self.datafolder = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data\20210322_DATA_ShortTime/'
+            # self.datafolder = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
             self.datafolder = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
             self.datafolder += '20210307_DATA_base/'
             # self.datafolder += '20210322_DATA_ShortTime/'

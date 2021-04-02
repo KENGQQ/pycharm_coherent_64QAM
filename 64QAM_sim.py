@@ -40,7 +40,7 @@ downsample_Tx = KENG_downsample(down_coeff=parameter.resamplenumber)
 downsample_Rx = KENG_downsample(down_coeff=parameter.resamplenumber)
 window_length = 7000
 correlation_length = 110000
-final_length = correlation_length - 8000
+final_length = correlation_length - 9000
 # correlation_length = 27000
 # final_length = correlation_length - 8000
 
