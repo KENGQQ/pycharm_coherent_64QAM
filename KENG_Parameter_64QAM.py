@@ -35,8 +35,8 @@ class Parameter:
 
             # self.datafolder = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
             self.datafolder = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
-            self.datafolder += '20210307_DATA_base/'
-            # self.datafolder += '20210322_DATA_ShortTime/'
+            # self.datafolder += '20210307_DATA_base/'
+            self.datafolder += '20210322_DATA_ShortTime/'
             self.LogTxXI_LSB=pd.read_table(self.datafolder+'LogTxXI_LSB.txt',names=['L1'])['L1'].tolist()
             self.LogTxXI_CSB=pd.read_table(self.datafolder+'LogTxXI_CSB.txt',names=['L1'])['L1'].tolist()
             self.LogTxXI_MSB=pd.read_table(self.datafolder+'LogTxXI_MSB.txt',names=['L1'])['L1'].tolist()

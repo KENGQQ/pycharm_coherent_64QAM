@@ -27,7 +27,7 @@ from Phaserecovery import *
 
 # address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
 address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
-folder = '20210307_DATA_base/500KLW_1GFO_50GBW_0dBLO_sample32_2000ns_CD1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm/'
+folder = '20210322_DATA_ShortTime/500KLW_2GFO_50GBW_0dBLO_sample32_500ns_CD1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm/'
 address += folder
 
 Imageaddress = address + 'image'
@@ -39,10 +39,10 @@ Tx2Bit = KENG_Tx2Bit(PAM_order=parameter.pamorder)
 downsample_Tx = KENG_downsample(down_coeff=parameter.resamplenumber)
 downsample_Rx = KENG_downsample(down_coeff=parameter.resamplenumber)
 window_length = 7000
-correlation_length = 110000
+# correlation_length = 110000
+# final_length = correlation_length - 9000
+correlation_length = 27000
 final_length = correlation_length - 9000
-# correlation_length = 27000
-# final_length = correlation_length - 8000
 
 Rx_XI, Rx_XQ = DataNormalize(parameter.RxXI, parameter.RxXQ, parameter.pamorder)
 Rx_YI, Rx_YQ = DataNormalize(parameter.RxYI, parameter.RxYQ, parameter.pamorder)
