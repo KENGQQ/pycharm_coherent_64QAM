@@ -2,6 +2,7 @@ import numpy as np
 import cmath
 from itertools import product
 from itertools import combinations_with_replacement
+from tqdm import trange
 class Equalizer:
     def __init__(self,  txsig, rxsig, order, taps=[0, 0, 0], trainoverhead=0.2):
         self.rxsig = np.array(rxsig)
@@ -336,7 +337,7 @@ class Equalizer:
                 C = np.matmul(np.conjugate(np.transpose(x2_)), np.conjugate(x2_))[od2indx].tolist()
                 featuretest.append(([1] + x1 + A + B + C))
         if self.volterraorder == 3:
-            for indx in range(tapscen, self.trainlength-tapscen):
+            for indx in trange(tapscen, self.trainlength-tapscen):
                 x1 = trainrx[indx - taps1cen:indx + taps1cen + 1].tolist()
                 x2 = trainrx[indx - taps2cen:indx + taps2cen + 1].tolist()
                 A_2 = []
@@ -350,7 +351,7 @@ class Equalizer:
                     A_3.append(x3[it[0]] * x3[it[1]] * x3[it[2]])
                 featuremat.append([1] + x1 + A_2 + A_3)
 
-            for indx in range(tapscen, self.testlength - tapscen):
+            for indx in trange(tapscen, self.testlength - tapscen):
                 x1 = testrx[indx - taps1cen:indx + taps1cen + 1].tolist()
                 x2 = testrx[indx - taps2cen:indx + taps2cen + 1].tolist()
 

@@ -27,22 +27,22 @@ from Phaserecovery import *
 
 # address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
 address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
-folder = '20210322_DATA_ShortTime/500KLW_2GFO_50GBW_0dBLO_sample32_500ns_CD1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm/'
+folder = '20210307_DATA_base/000KLW_0GFO_50GBW_0dBLO_sample32_2000ns_CD1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm/'
 address += folder
 
-Imageaddress = address + 'image'
+Imageaddress = address + 'image_meeting'
 parameter = Parameter(address, simulation=True)
-open_excel(address)
+# open_excel(address)
 
 print("symbolrate = {}Gbit/s\npamorder = {}\nresamplenumber = {}".format(parameter.symbolRate / 1e9, parameter.pamorder, parameter.resamplenumber))
 Tx2Bit = KENG_Tx2Bit(PAM_order=parameter.pamorder)
 downsample_Tx = KENG_downsample(down_coeff=parameter.resamplenumber)
 downsample_Rx = KENG_downsample(down_coeff=parameter.resamplenumber)
 window_length = 7000
-# correlation_length = 110000
-# final_length = correlation_length - 9000
-correlation_length = 27000
+correlation_length = 110000
 final_length = correlation_length - 9000
+# correlation_length = 27000
+# final_length = correlation_length - 9000
 
 Rx_XI, Rx_XQ = DataNormalize(parameter.RxXI, parameter.RxXQ, parameter.pamorder)
 Rx_YI, Rx_YQ = DataNormalize(parameter.RxYI, parameter.RxYQ, parameter.pamorder)
@@ -83,7 +83,7 @@ TxYI, TxYQ = QAM64_LogicTx(LogTxYI_LSB, LogTxYI_CSB, LogTxYI_MSB, LogTxYQ_LSB, L
 # Histogram2D('Tx_X_normalized', Tx_Signal_X, Imageaddress)
 # Histogram2D('Tx_X_normalized', Tx_Signal_Y, Imageaddress)
 
-eyestart, eyeend = 0,32
+eyestart, eyeend = 25,26
 for eyepos in range(eyestart, eyeend, 1):
     down_num = eyepos
     # TxXI = downsample_Tx.return_value(Tx_XI[down_num:])
@@ -120,7 +120,7 @@ for eyepos in range(eyestart, eyeend, 1):
     # Rx_Y_iqimba = IQimbaCompensator(Rx_Signal_Y, 1e-4)
     # Histogram2D("IQimba", Rx_X_iqimba[0])
     ##########IQimba################
-    tap_start, tap_end =83, 93
+    tap_start, tap_end =73,75
     for taps in range(tap_start, tap_end, 2):
         print("eye : {} ,tap : {}".format(eyepos,taps))
         # Rx_Signal_X_mat = sio.loadmat('RxX_mat.mat')
@@ -130,7 +130,7 @@ for eyepos in range(eyestart, eyeend, 1):
         # Rx_Signal_Y_mat = Rx_Signal_Y_mat['rxSym']
         # Rx_Signal_Y = np.reshape(Rx_Signal_Y_mat, -1)
 
-        cma = CMA_single(Rx_Signal_X, Rx_Signal_Y, taps=taps, iter=100, mean=0)
+        cma = CMA_single(Rx_Signal_X, Rx_Signal_Y, taps=taps, iter=200, mean=0)
         # aa = cma.ConstModulusAlgorithm(Rx_Signal_X , taps, 1e-6,4 ,
 
         # cma.qam_4_butter_real()
@@ -225,13 +225,13 @@ for eyepos in range(eyestart, eyeend, 1):
         bercount_X = BERcount(np.array(TxX_corr), np.array(RxX_corr), parameter.pamorder)
         print('BER_X = {} \nSNR_X = {} \nEVM_X = {}'.format(bercount_X, SNR_X, EVM_X))
         XSNR[eyepos] ,XEVM[eyepos] = SNR_X, EVM_X
-        print('----------------write excel----------------')
-        parameter_record = [eyepos, str(
-            [cma.mean, cma.type, cma.overhead * 100, cma.cmataps, cma.stepsize, cma.iterator, cma.earlystop,
-             cma.stepsizeadjust]), str([CMA_cost_X, CMA_cost_Y]),
-                            PLL_BW, str([ph.c1_radius_o, ph.c3_radius_i, ph.c3_radius_o, ph.c9_radius_i]), str([(XIshift, XQshift), (XI_corr, XQ_corr)]), str([SNR_X, EVM_X, bercount_X])]
-
-        write_excel(address, parameter_record)
+        # print('----------------write excel----------------')
+        # parameter_record = [eyepos, str(
+        #     [cma.mean, cma.type, cma.overhead * 100, cma.cmataps, cma.stepsize, cma.iterator, cma.earlystop,
+        #      cma.stepsizeadjust]), str([CMA_cost_X, CMA_cost_Y]),
+        #                     PLL_BW, str([ph.c1_radius_o, ph.c3_radius_i, ph.c3_radius_o, ph.c9_radius_i]), str([(XIshift, XQshift), (XI_corr, XQ_corr)]), str([SNR_X, EVM_X, bercount_X])]
+        #
+        # write_excel(address, parameter_record)
 
         print('================================')
         print('Y part')
@@ -297,8 +297,8 @@ for eyepos in range(eyestart, eyeend, 1):
     # np.save(address + 'XSNR', XSNR)
     # np.save(address + 'YSNR', YSNR)
 # ===========================================volterra=========================================================
-equalizer_real = Equalizer(np.real(np.array(TxX_corr)), np.real(np.array(RxX_corr)), 3, [31, 31, 31], 0.5)
-equalizer_imag = Equalizer(np.imag(np.array(TxX_corr)), np.imag(np.array(RxX_corr)), 3, [31, 31, 31], 0.5)
+equalizer_real = Equalizer(np.real(np.array(TxX_corr)), np.real(np.array(RxX_corr)), 3, [31, 31, 31], 0.12)
+equalizer_imag = Equalizer(np.imag(np.array(TxX_corr)), np.imag(np.array(RxX_corr)), 3, [31, 31, 31], 0.12)
 Tx_volterra_real, Rx_volterra_real = equalizer_real.realvolterra()
 Tx_volterra_imag, Rx_volterra_imag = equalizer_imag.realvolterra()
 Tx_real_volterra = Tx_volterra_real + 1j * Tx_volterra_imag
