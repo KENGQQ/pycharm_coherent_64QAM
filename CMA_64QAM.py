@@ -1018,14 +1018,14 @@ class CMA_single:
         self.rx_x_single = np.array(rx_x)
         self.rx_y_single = np.array(rx_y)
         self.datalength = len(rx_x)
-        self.stepsizelist = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 6.409e-6, 1e-6, 2.025e-6 , 8e-7 , 1e-7, 1e-8]
+        self.stepsizelist = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 6.409e-6, 1e-6, 2.025e-6 , 8e-7 , 1e-7, 1e-8, 1e9]
         self.overhead = 1
         self.cmataps = taps
         self.center = int((self.cmataps - 1) / 2)
         self.iterator = iter
         self.earlystop = 0.001
         self.stepsizeadjust = 0.95
-        self.stepsize = self.stepsizelist[8]
+        self.stepsize = self.stepsizelist[10]
         self.stepsize_x = self.stepsize
         self.stepsize_y = self.stepsize
 
@@ -1606,7 +1606,7 @@ class CMA_single:
         if stage == 3:
             radius = [2 ** 0.5, 10 ** 0.5, 18 ** 0.5, 26 ** 0.5, 34 ** 0.5, 50 ** 0.5, 58 ** 0.5, 74 ** 0.5, 98 ** 0.5]
         elif stage == 2:
-            radius = [10 ** 0.5, 50 ** 0.5, 98 ** 0.5]
+            radius = [10 ** 0.5, 50 ** 0.5, 74 ** 0.5]
         elif stage == 1:
             radius = [50 ** 0.5]
 

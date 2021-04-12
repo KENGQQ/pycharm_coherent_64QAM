@@ -88,6 +88,9 @@ class KENG_phaserecovery:
         self.c9_radius_i = r9_i
         self.c9_radius_o = 12
         self.tap = 201
+        # self.tap = 101
+        # self.tap = 151
+
 
         Rx_amplitude = np.abs(Rx)
         Rx_zeropad = np.zeros(len(Rx), dtype = "complex_")

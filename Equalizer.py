@@ -57,7 +57,7 @@ class Equalizer:
                 C = np.matmul(np.conjugate(np.transpose(x2_)), np.conjugate(x2_))[od2indx].tolist()
                 featuretest.append(([1] + x1 + A + B + C))
         if self.volterraorder == 3:
-            for indx in range(tapscen, self.trainlength-tapscen):
+            for indx in trange(tapscen, self.trainlength-tapscen):
                 x1 = trainrx[indx - taps1cen:indx + taps1cen + 1].tolist()
                 x1_conj = np.conjugate(x1).tolist()
                 x2 = trainrx[indx - taps2cen:indx + taps2cen + 1].tolist()
@@ -79,7 +79,7 @@ class Equalizer:
                     D_3.append(x3_conj[it[0]] * x3_conj[it[1]] * x3_conj[it[2]])
                 featuremat.append([1] + x1 + x1_conj + A_2 + B_2 + C_2 + A_3 + B_3 + C_3 + D_3)
 
-            for indx in range(tapscen, self.testlength - tapscen):
+            for indx in trange(tapscen, self.testlength - tapscen):
                 x1 = testrx[indx - taps1cen:indx + taps1cen + 1].tolist()
                 x1_conj = np.conjugate(x1).tolist()
                 x2 = testrx[indx - taps2cen:indx + taps2cen + 1].tolist()
