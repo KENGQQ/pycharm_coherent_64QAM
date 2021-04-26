@@ -27,12 +27,12 @@ from Phaserecovery import *
 
 address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
 # address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
-folder = '20210412_DATA_ShortTime_integration/500KLW_0GFO_50GBW_0dBLO_sample32_500ns_CD0000_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm/'
+folder = '20210322_DATA_ShortTime/100KLW_1GFO_50GBW_0dBLO_sample32_500ns_CD1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm/'
 address += folder
 
 Imageaddress = address + 'image'
 parameter = Parameter(address, simulation=True)
-# open_excel(address)
+open_excel(address)
 
 print("symbolrate = {}Gbit/s\npamorder = {}\nresamplenumber = {}".format(parameter.symbolRate / 1e9, parameter.pamorder, parameter.resamplenumber))
 Tx2Bit = KENG_Tx2Bit(PAM_order=parameter.pamorder)
@@ -83,7 +83,7 @@ TxYI, TxYQ = QAM64_LogicTx(LogTxYI_LSB, LogTxYI_CSB, LogTxYI_MSB, LogTxYQ_LSB, L
 # Histogram2D('Tx_X_normalized', Tx_Signal_X, Imageaddress)
 # Histogram2D('Tx_X_normalized', Tx_Signal_Y, Imageaddress)
 
-eyestart, eyeend = 19,20
+eyestart, eyeend = 0,32
 for eyepos in range(eyestart, eyeend, 1):
     down_num = eyepos
     # TxXI = downsample_Tx.return_value(Tx_XI[down_num:])
@@ -118,9 +118,11 @@ for eyepos in range(eyestart, eyeend, 1):
     # Rx_Signal_Y = np.reshape(Rx_Signal_Y,(1,-1))
     # Rx_X_iqimba = IQimbaCompensator(Rx_Signal_X, 1e-4)
     # Rx_Y_iqimba = IQimbaCompensator(Rx_Signal_Y, 1e-4)
-    # Histogram2D("IQimba", Rx_X_iqimba[0])
+    # # Histogram2D("IQimba", Rx_X_iqimba[0])
+    # Rx_Signal_X = np.reshape(Rx_X_iqimba, [Rx_X_iqimba.size,])
+    # Rx_Signal_Y = np.reshape(Rx_Y_iqimba, [Rx_Y_iqimba.size,])
     ##########IQimba################
-    tap_start, tap_end =27,29
+    tap_start, tap_end =61,95
     for taps in range(tap_start, tap_end, 2):
         print("eye : {} ,tap : {}".format(eyepos,taps))
         # Rx_Signal_X_mat = sio.loadmat('RxX_mat.mat')
@@ -130,7 +132,7 @@ for eyepos in range(eyestart, eyeend, 1):
         # Rx_Signal_Y_mat = Rx_Signal_Y_mat['rxSym']
         # Rx_Signal_Y = np.reshape(Rx_Signal_Y_mat, -1)
 
-        cma = CMA_single(Rx_Signal_X, Rx_Signal_Y, taps=taps, iter=30, mean=0)
+        cma = CMA_single(Rx_Signal_X, Rx_Signal_Y, taps=taps, iter=100, mean=0)
         # aa = cma.ConstModulusAlgorithm(Rx_Signal_X , taps, 1e-6,4 ,
 
         # cma.qam_4_butter_real()
@@ -154,20 +156,20 @@ for eyepos in range(eyestart, eyeend, 1):
                     Rx_X_CMA_stage1, Imageaddress)
         Rx_X_CMA = Rx_X_CMA_stage1
 
-        cma = CMA_single(Rx_X_CMA_stage1, Rx_Signal_Y, taps=27, iter=50, mean=0)
-        cma.qam_4_side_RD_polarization(stage=2)
-        Rx_X_CMA_stage2 = cma.rx_x_cma[cma.rx_x_cma != 0]
-        Histogram2D('CMA_X_{}_stage2 taps={} {}'.format(eyepos, cma.cmataps, cma.type),
-                    Rx_X_CMA_stage2, Imageaddress)
-        Rx_X_CMA = Rx_X_CMA_stage2
+        # cma = CMA_single(Rx_X_CMA_stage1, Rx_Signal_Y, taps=27, iter=50, mean=0)
+        # cma.qam_4_side_RD_polarization(stage=2)
+        # Rx_X_CMA_stage2 = cma.rx_x_cma[cma.rx_x_cma != 0]
+        # Histogram2D('CMA_X_{}_stage2 taps={} {}'.format(eyepos, cma.cmataps, cma.type),
+        #             Rx_X_CMA_stage2, Imageaddress)
+        # Rx_X_CMA = Rx_X_CMA_stage2
 
 
-        cma = CMA_single(Rx_X_CMA_stage2, Rx_Signal_Y, taps=5, iter=80, mean=0)
-        cma.qam_4_side_RD_polarization(stage = 3)
-        Rx_X_CMA_stage3 = cma.rx_x_cma[cma.rx_x_cma != 0]
-        Histogram2D('CMA_X_{}_stage3 taps={} {}'.format(eyepos, cma.cmataps, cma.type),
-                    Rx_X_CMA_stage3, Imageaddress)
-        Rx_X_CMA = Rx_X_CMA_stage3
+        # cma = CMA_single(Rx_X_CMA_stage1, Rx_Signal_Y, taps=27, iter=80, mean=0)
+        # cma.qam_4_side_RD_polarization(stage = 3)
+        # Rx_X_CMA_stage3 = cma.rx_x_cma[cma.rx_x_cma != 0]
+        # Histogram2D('CMA_X_{}_stage3 taps={} {}'.format(eyepos, cma.cmataps, cma.type),
+        #             Rx_X_CMA_stage3, Imageaddress)
+        # Rx_X_CMA = Rx_X_CMA_stage3
 
 
         # Rx_X_CMA, Rx_Y_CMA = Downsample(cma.rx_x_cma, n, cma.center), Downsample(cma.rx_y_cma, n, cma.center)
@@ -199,9 +201,9 @@ for eyepos in range(eyestart, eyeend, 1):
         PN_RxX = PN_RxX[PN_RxX != 0]
         Histogram2D('KENG_PhaseNoise_X', PN_RxX, Imageaddress)
 
-        # Rx_RA = ph.Rotation_algorithm(PN_RxX)
-        # Histogram2D('KENG_PhaseNoise_X_RAstage', Rx_RA, Imageaddress)
-        # PN_RxX = Rx_RA
+        Rx_RA = ph.Rotation_algorithm(PN_RxX)
+        Histogram2D('KENG_PhaseNoise_X_RAstage', Rx_RA, Imageaddress)
+        PN_RxX = Rx_RA
 
         Normal_ph_RxX_real, Normal_ph_RxX_imag = DataNormalize(np.real(PN_RxX), np.imag(PN_RxX), parameter.pamorder)
         Normal_ph_RxX = Normal_ph_RxX_real + 1j * Normal_ph_RxX_imag
@@ -219,13 +221,13 @@ for eyepos in range(eyestart, eyeend, 1):
         bercount_X = BERcount(np.array(TxX_corr), np.array(RxX_corr), parameter.pamorder)
         print('BER_X = {} \nSNR_X = {} \nEVM_X = {}'.format(bercount_X, SNR_X, EVM_X))
         XSNR[eyepos] ,XEVM[eyepos] = SNR_X, EVM_X
-        # print('----------------write excel----------------')
-        # parameter_record = [eyepos, str(
-        #     [cma.mean, cma.type, cma.overhead * 100, cma.cmataps, cma.stepsize, cma.iterator, cma.earlystop,
-        #      cma.stepsizeadjust]), str([CMA_cost_X, CMA_cost_Y]),
-        #                     PLL_BW, str([ph.c1_radius_o, ph.c3_radius_i, ph.c3_radius_o, ph.c9_radius_i]), str([(XIshift, XQshift), (XI_corr, XQ_corr)]), str([SNR_X, EVM_X, bercount_X])]
-        #
-        # write_excel(address, parameter_record)
+        print('----------------write excel----------------')
+        parameter_record = [eyepos, str(
+            [cma.mean, cma.type, cma.overhead * 100, cma.cmataps, cma.stepsize, cma.iterator, cma.earlystop,
+             cma.stepsizeadjust]), str([CMA_cost_X, CMA_cost_Y]),
+                            PLL_BW, str([ph.c1_radius_o, ph.c3_radius_i, ph.c3_radius_o, ph.c9_radius_i]), str([(XIshift, XQshift), (XI_corr, XQ_corr)]), str([SNR_X, EVM_X, bercount_X])]
+
+        write_excel(address, parameter_record)
 
         print('================================')
         print('Y part')

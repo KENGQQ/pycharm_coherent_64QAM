@@ -176,7 +176,7 @@ class KENG_phaserecovery:
                     break
 
         a = KENG_phaserecovery()
-        Rx_vv = a.first_QPSK(Rx_RA, tap = 201)
+        Rx_vv = a.first_QPSK(Rx_RA, tap = 51)
         phase1 = a.phase_adj
 
         Rx_ph = np.zeros(int(np.size(phase1)), dtype='complex_')
@@ -586,7 +586,7 @@ class KENG_phaserecovery:
         if maxIndex > Nfft / 2:
             maxIndex = maxIndex - Nfft
         estFreqOffset = fs / Nfft * (maxIndex - 1) / m_order;
-        print('Frequency offset={} GHz'.format(estFreqOffset/ 1e9))
+        print('Frequency offset={} GHz'.format(np.round(estFreqOffset/ 1e9, 5)))
         rx = rx * np.exp(-estFreqOffset * np.linspace(1, N, N) * 2 * np.pi * 1j / fs)
         # rx = rx * np.exp(estFreqOffset * np.linspace(1, N, N) * 2 * np.pi * 1j / fs)
 
