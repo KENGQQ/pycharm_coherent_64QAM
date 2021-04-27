@@ -12,7 +12,6 @@ from subfunction.Downsample import *
 from subfunction.excelrecord import *
 
 from CMA_64QAM import *
-from CMA_tseng import *
 
 from KENG_Tx2Bit import *
 from KENG_downsample import *
@@ -24,15 +23,22 @@ from KENG_64QAM_LogicTx import *
 
 from Equalizer import *
 from Phaserecovery import *
+import torch
+from Equalizer_RBF import *
+from Rolling_window import  rolling_window
+from torch.utils import data as Data
+
+# import tqdm
+from tqdm import tqdm
 
 address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
 # address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
-folder = '20210322_DATA_ShortTime/100KLW_1GFO_50GBW_0dBLO_sample32_500ns_CD1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm/'
+folder = '20210427_DATA_OSNR/100KLW_1GFO_50GBW_0dBLO_sample32_500ns_CD000_EDC0_TxO-2dBm_RxO-08dBm_OSNR32dB_LO00dBm/'
 address += folder
 
-Imageaddress = address + 'image'
+Imageaddress = address + 'image2'
 parameter = Parameter(address, simulation=True)
-open_excel(address)
+# open_excel(address)
 
 print("symbolrate = {}Gbit/s\npamorder = {}\nresamplenumber = {}".format(parameter.symbolRate / 1e9, parameter.pamorder, parameter.resamplenumber))
 Tx2Bit = KENG_Tx2Bit(PAM_order=parameter.pamorder)
@@ -83,7 +89,7 @@ TxYI, TxYQ = QAM64_LogicTx(LogTxYI_LSB, LogTxYI_CSB, LogTxYI_MSB, LogTxYQ_LSB, L
 # Histogram2D('Tx_X_normalized', Tx_Signal_X, Imageaddress)
 # Histogram2D('Tx_X_normalized', Tx_Signal_Y, Imageaddress)
 
-eyestart, eyeend = 0,32
+eyestart, eyeend = 18,19
 for eyepos in range(eyestart, eyeend, 1):
     down_num = eyepos
     # TxXI = downsample_Tx.return_value(Tx_XI[down_num:])
@@ -111,7 +117,7 @@ for eyepos in range(eyestart, eyeend, 1):
     # RxXI ,RxXQ=DataNormalize(RxXI ,RxXQ, parameter.pamorder)
     # RxYI ,RxYQ=DataNormalize(RxYI ,RxYQ, parameter.pamorder)
 
-    # Histogram2D('Rx_X_origin_{}'.format(eyepos), Rx_Signal_X, Imageaddress)
+    Histogram2D('Rx_X_origin_{}'.format(eyepos), Rx_Signal_X, Imageaddress)
     # Histogram2D('Rx_Y_origin_{}'.format(eyepos), Rx_Signal_Y, Imageaddress)
     #########IQimba################
     # Rx_Signal_X = np.reshape(Rx_Signal_X,(1,-1))
@@ -122,7 +128,7 @@ for eyepos in range(eyestart, eyeend, 1):
     # Rx_Signal_X = np.reshape(Rx_X_iqimba, [Rx_X_iqimba.size,])
     # Rx_Signal_Y = np.reshape(Rx_Y_iqimba, [Rx_Y_iqimba.size,])
     ##########IQimba################
-    tap_start, tap_end =61,95
+    tap_start, tap_end =27, 29
     for taps in range(tap_start, tap_end, 2):
         print("eye : {} ,tap : {}".format(eyepos,taps))
         # Rx_Signal_X_mat = sio.loadmat('RxX_mat.mat')
@@ -164,12 +170,13 @@ for eyepos in range(eyestart, eyeend, 1):
         # Rx_X_CMA = Rx_X_CMA_stage2
 
 
-        # cma = CMA_single(Rx_X_CMA_stage1, Rx_Signal_Y, taps=27, iter=80, mean=0)
-        # cma.qam_4_side_RD_polarization(stage = 3)
-        # Rx_X_CMA_stage3 = cma.rx_x_cma[cma.rx_x_cma != 0]
-        # Histogram2D('CMA_X_{}_stage3 taps={} {}'.format(eyepos, cma.cmataps, cma.type),
-        #             Rx_X_CMA_stage3, Imageaddress)
-        # Rx_X_CMA = Rx_X_CMA_stage3
+        cma = CMA_single(Rx_X_CMA_stage1, Rx_Signal_Y, taps=27, iter=80, mean=0)
+        cma.stepsize = cma.stepsizelist[10]
+        cma.qam_4_side_RD_polarization(stage = 3)
+        Rx_X_CMA_stage3 = cma.rx_x_cma[cma.rx_x_cma != 0]
+        Histogram2D('CMA_X_{}_stage3 taps={} {}'.format(eyepos, cma.cmataps, cma.type),
+                    Rx_X_CMA_stage3, Imageaddress)
+        Rx_X_CMA = Rx_X_CMA_stage3
 
 
         # Rx_X_CMA, Rx_Y_CMA = Downsample(cma.rx_x_cma, n, cma.center), Downsample(cma.rx_y_cma, n, cma.center)
@@ -221,13 +228,13 @@ for eyepos in range(eyestart, eyeend, 1):
         bercount_X = BERcount(np.array(TxX_corr), np.array(RxX_corr), parameter.pamorder)
         print('BER_X = {} \nSNR_X = {} \nEVM_X = {}'.format(bercount_X, SNR_X, EVM_X))
         XSNR[eyepos] ,XEVM[eyepos] = SNR_X, EVM_X
-        print('----------------write excel----------------')
-        parameter_record = [eyepos, str(
-            [cma.mean, cma.type, cma.overhead * 100, cma.cmataps, cma.stepsize, cma.iterator, cma.earlystop,
-             cma.stepsizeadjust]), str([CMA_cost_X, CMA_cost_Y]),
-                            PLL_BW, str([ph.c1_radius_o, ph.c3_radius_i, ph.c3_radius_o, ph.c9_radius_i]), str([(XIshift, XQshift), (XI_corr, XQ_corr)]), str([SNR_X, EVM_X, bercount_X])]
-
-        write_excel(address, parameter_record)
+        # print('----------------write excel----------------')
+        # parameter_record = [eyepos, str(
+        #     [cma.mean, cma.type, cma.overhead * 100, cma.cmataps, cma.stepsize, cma.iterator, cma.earlystop,
+        #      cma.stepsizeadjust]), str([CMA_cost_X, CMA_cost_Y]),
+        #                     PLL_BW, str([ph.c1_radius_o, ph.c3_radius_i, ph.c3_radius_o, ph.c9_radius_i]), str([(XIshift, XQshift), (XI_corr, XQ_corr)]), str([SNR_X, EVM_X, bercount_X])]
+        #
+        # write_excel(address, parameter_record)
 
         print('================================')
         print('Y part')
@@ -337,3 +344,92 @@ print("BERcount_cmplvol : {}".format(compvol_bercount))
 # Histogram2D_tseng("Focomoen_tseng", FOcompen_Y)
 # Histogram2D_tseng("V-V_tseng", PN_RxX)
 # Histogram2D_tseng("Rx_tseng", Rx_Signal_Y)
+
+
+
+
+# NN equalizer
+    # parameter
+    taps = 31
+    batch_size = 500
+    LR = 1e-3
+    EPOCH = 300
+    overhead = 0.5
+    trainnum = int(len(RxX_corr) * overhead)
+    device = torch.device("cuda:0")
+    train_inputr = rolling_window(torch.Tensor(RxX_corr.real), taps)[:trainnum]
+    train_inputi = rolling_window(torch.Tensor(RxX_corr.imag), taps)[:trainnum]
+    train_targetr = torch.Tensor(TxX_corr.real[taps // 2:-taps // 2 + 1])[:trainnum]
+    train_targeti = torch.Tensor(TxX_corr.imag[taps // 2:-taps // 2 + 1])[:trainnum]
+    train_tensor = Data.TensorDataset(train_inputr, train_inputi, train_targetr, train_targeti)
+    train_loader = Data.DataLoader(train_tensor, batch_size=batch_size, shuffle=False)
+
+    val_inputr = rolling_window(torch.Tensor(RxX_corr.real), taps)
+    val_inputi = rolling_window(torch.Tensor(RxX_corr.imag), taps)
+    val_targetr = torch.Tensor(TxX_corr.real[taps // 2:-taps // 2 + 1])
+    val_targeti = torch.Tensor(TxX_corr.imag[taps // 2:-taps // 2 + 1])
+    val_tensor = Data.TensorDataset(val_inputr, val_inputi, val_targetr, val_targeti)
+    val_loader = Data.DataLoader(val_tensor, batch_size=batch_size, shuffle=False)
+
+    layer_widths = [16, 16, 1]
+    layer_centres = [16, 16]
+    basis_func = gaussian
+    final_modelr, final_modeli = Network(layer_widths, layer_centres, basis_func, taps).to(device), Network(
+        layer_widths, layer_centres, basis_func, taps).to(device)
+    final_optr = torch.optim.Adam(final_modelr.parameters(), lr=LR)
+    final_opti = torch.optim.Adam(final_modeli.parameters(), lr=LR)
+    # modelx = conv1dResNet(Residual_Block, [2, 2, 2, 2]).to(device)
+    # lossxr = nn.MSELoss()
+    # lossxi = nn.MSELoss()
+    # lossxc = nn.CrossEntropyLoss()
+    # opty = torch.optim.Adam(modely.parameters(), weight_decay=1e-2, lr=LR)
+    L = []
+    val_L = []
+    for epoch in tqdm(range(EPOCH)):
+        for i, (dr, di, txr, txi) in enumerate(train_loader):
+            final_modelr.train()
+            final_modeli.train()
+            outr, outi = final_modelr(dr.to(device)), final_modeli(di.to(device))
+            # outr,outi= final_modelr(dr.unsqueeze(1).to(device)),final_modeli(di.unsqueeze(1).to(device))
+            # trr,tri = harddecision(txr,txi)
+            Lossr = nn.MSELoss()(outr.squeeze().cpu(), torch.Tensor(txr))
+            Lossi = nn.MSELoss()(outi.squeeze().cpu(), torch.Tensor(txi))
+            Loss = Lossr + Lossi
+            final_optr.zero_grad()
+            Lossr.backward(retain_graph=True)
+            final_optr.step()
+            final_opti.zero_grad()
+            Lossi.backward()
+            final_opti.step()
+            L.append(Loss.detach().cpu().numpy())
+            # modely.eval()
+        print("Train Loss:{:.3f}".format(Loss),
+              '||' "Train Bercount:{:.3E}".format(BERcount(txr + 1j * txi, outr.cpu() + 1j * outi.cpu(), parameter.pamorder)))
+        # print('\n training Accx: %f\n training Accy: %f\n' % (np.mean(Accx), np.mean(Accy)))
+        # Accx = []
+        # # Accy = []
+        predictr, predicti = [], []
+    final_modelr.eval()
+    final_modeli.eval()
+    for i, (dr, di, txr, txi) in enumerate(val_loader):
+        outr, outi = final_modelr(dr.to(device)), final_modeli(di.to(device))
+        predictr.extend(outr.cpu().detach().numpy())
+        predicti.extend(outi.cpu().detach().numpy())
+        # Lossxr = lossxr(outr.cpu(), txr)
+        # Lossxi = lossxi(outi.cpu(), txi)
+        # Lossyr = lossyr(outy[:, 0].cpu(), tyr)
+        # Lossyi = lossyi(outy[:, 1].cpu(), tyi)
+        # Lossxc = lossxc(outcx.cpu(), tgx)
+        # Lossyc = lossyc(outcy.cpu(), tgy)
+        # xacc = (tgx.eq(torch.max(outcx.cpu(), 1)[1])).sum() / outcx.shape[0]
+        # yacc = (tgy.eq(torch.max(outcy.cpu(), 1)[1])).sum() / outcy.shape[0]
+        print("Val BERcount:{:.3E}".format(BERcount(txr + 1j * txi, outr.cpu() + 1j * outi.cpu(), 4)))
+    predictr = np.array(predictr).squeeze()
+    predicti = np.array(predicti).squeeze()
+    # snr_RBF, evm_RBF = SNR(TxX_corr[taps // 2:-taps // 2 + 1], (np.array(predictr) + 1j * np.array(predicti)).squeeze())
+    bercount = BERcount(TxX_corr[taps // 2:-taps // 2 + 1], (np.array(predictr) + 1j * np.array(predicti)).squeeze(), parameter.pamorder)
+    # print(snr_RBF, evm_RBF)
+    # Histogram2D("RBF-Net", (np.array(predictr) + 1j * np.array(predicti)).squeeze(), Imageaddress, snr_RBF, evm_RBF)
+    Histogram2D("RBF-Net", (np.array(predictr) + 1j * np.array(predicti)).squeeze(), Imageaddress)
+
+
