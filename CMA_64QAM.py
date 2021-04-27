@@ -1026,7 +1026,7 @@ class CMA_single:
         self.iterator = iter
         self.earlystop = 0.001
         self.stepsizeadjust = 0.95
-        self.stepsize = self.stepsizelist[7]
+        self.stepsize = self.stepsizelist[8]
         self.stepsize_x = self.stepsize
         self.stepsize_y = self.stepsize
 

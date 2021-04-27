@@ -22,17 +22,16 @@ from KENG_Volterra import *
 from KENG_64QAM_LogicTx import *
 
 from Equalizer import *
-from Phaserecovery import *
-import torch
-from Equalizer_RBF import *
-from Rolling_window import  rolling_window
-from torch.utils import data as Data
-
-# import tqdm
+# from Phaserecovery import *
+# import torch
+# from Equalizer_RBF import *
+# from Rolling_window import  rolling_window
+# from torch.utils import data as Data
+#
 from tqdm import tqdm
 
-address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
-# address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
+# address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
+address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
 folder = '20210427_DATA_OSNR/100KLW_1GFO_50GBW_0dBLO_sample32_500ns_CD000_EDC0_TxO-2dBm_RxO-08dBm_OSNR32dB_LO00dBm/'
 address += folder
 
@@ -307,7 +306,7 @@ Tx_volterra_imag, Rx_volterra_imag = equalizer_imag.realvolterra()
 Tx_real_volterra = Tx_volterra_real + 1j * Tx_volterra_imag
 Rx_real_volterra = Rx_volterra_real + 1j * Rx_volterra_imag
 
-snr_realvolterra, evm_realvolterra = SNR(Tx_real_volterra, Rx_real_volterra)
+snr_realvolterra, evm_realvolterra, ber_realvolterra = SNR(Tx_real_volterra, Rx_real_volterra)
 print("SNR_realvol : {}, EVM_realvol : {}".format(snr_realvolterra, evm_realvolterra))
 Histogram2D("RealVolterra", Rx_real_volterra, Imageaddress, snr_realvolterra, evm_realvolterra)
 #
@@ -350,86 +349,86 @@ print("BERcount_cmplvol : {}".format(compvol_bercount))
 
 # NN equalizer
     # parameter
-    taps = 31
-    batch_size = 500
-    LR = 1e-3
-    EPOCH = 300
-    overhead = 0.5
-    trainnum = int(len(RxX_corr) * overhead)
-    device = torch.device("cuda:0")
-    train_inputr = rolling_window(torch.Tensor(RxX_corr.real), taps)[:trainnum]
-    train_inputi = rolling_window(torch.Tensor(RxX_corr.imag), taps)[:trainnum]
-    train_targetr = torch.Tensor(TxX_corr.real[taps // 2:-taps // 2 + 1])[:trainnum]
-    train_targeti = torch.Tensor(TxX_corr.imag[taps // 2:-taps // 2 + 1])[:trainnum]
-    train_tensor = Data.TensorDataset(train_inputr, train_inputi, train_targetr, train_targeti)
-    train_loader = Data.DataLoader(train_tensor, batch_size=batch_size, shuffle=False)
-
-    val_inputr = rolling_window(torch.Tensor(RxX_corr.real), taps)
-    val_inputi = rolling_window(torch.Tensor(RxX_corr.imag), taps)
-    val_targetr = torch.Tensor(TxX_corr.real[taps // 2:-taps // 2 + 1])
-    val_targeti = torch.Tensor(TxX_corr.imag[taps // 2:-taps // 2 + 1])
-    val_tensor = Data.TensorDataset(val_inputr, val_inputi, val_targetr, val_targeti)
-    val_loader = Data.DataLoader(val_tensor, batch_size=batch_size, shuffle=False)
-
-    layer_widths = [16, 16, 1]
-    layer_centres = [16, 16]
-    basis_func = gaussian
-    final_modelr, final_modeli = Network(layer_widths, layer_centres, basis_func, taps).to(device), Network(
-        layer_widths, layer_centres, basis_func, taps).to(device)
-    final_optr = torch.optim.Adam(final_modelr.parameters(), lr=LR)
-    final_opti = torch.optim.Adam(final_modeli.parameters(), lr=LR)
-    # modelx = conv1dResNet(Residual_Block, [2, 2, 2, 2]).to(device)
-    # lossxr = nn.MSELoss()
-    # lossxi = nn.MSELoss()
-    # lossxc = nn.CrossEntropyLoss()
-    # opty = torch.optim.Adam(modely.parameters(), weight_decay=1e-2, lr=LR)
-    L = []
-    val_L = []
-    for epoch in tqdm(range(EPOCH)):
-        for i, (dr, di, txr, txi) in enumerate(train_loader):
-            final_modelr.train()
-            final_modeli.train()
-            outr, outi = final_modelr(dr.to(device)), final_modeli(di.to(device))
-            # outr,outi= final_modelr(dr.unsqueeze(1).to(device)),final_modeli(di.unsqueeze(1).to(device))
-            # trr,tri = harddecision(txr,txi)
-            Lossr = nn.MSELoss()(outr.squeeze().cpu(), torch.Tensor(txr))
-            Lossi = nn.MSELoss()(outi.squeeze().cpu(), torch.Tensor(txi))
-            Loss = Lossr + Lossi
-            final_optr.zero_grad()
-            Lossr.backward(retain_graph=True)
-            final_optr.step()
-            final_opti.zero_grad()
-            Lossi.backward()
-            final_opti.step()
-            L.append(Loss.detach().cpu().numpy())
-            # modely.eval()
-        print("Train Loss:{:.3f}".format(Loss),
-              '||' "Train Bercount:{:.3E}".format(BERcount(txr + 1j * txi, outr.cpu() + 1j * outi.cpu(), parameter.pamorder)))
-        # print('\n training Accx: %f\n training Accy: %f\n' % (np.mean(Accx), np.mean(Accy)))
-        # Accx = []
-        # # Accy = []
-        predictr, predicti = [], []
-    final_modelr.eval()
-    final_modeli.eval()
-    for i, (dr, di, txr, txi) in enumerate(val_loader):
-        outr, outi = final_modelr(dr.to(device)), final_modeli(di.to(device))
-        predictr.extend(outr.cpu().detach().numpy())
-        predicti.extend(outi.cpu().detach().numpy())
-        # Lossxr = lossxr(outr.cpu(), txr)
-        # Lossxi = lossxi(outi.cpu(), txi)
-        # Lossyr = lossyr(outy[:, 0].cpu(), tyr)
-        # Lossyi = lossyi(outy[:, 1].cpu(), tyi)
-        # Lossxc = lossxc(outcx.cpu(), tgx)
-        # Lossyc = lossyc(outcy.cpu(), tgy)
-        # xacc = (tgx.eq(torch.max(outcx.cpu(), 1)[1])).sum() / outcx.shape[0]
-        # yacc = (tgy.eq(torch.max(outcy.cpu(), 1)[1])).sum() / outcy.shape[0]
-        print("Val BERcount:{:.3E}".format(BERcount(txr + 1j * txi, outr.cpu() + 1j * outi.cpu(), 4)))
-    predictr = np.array(predictr).squeeze()
-    predicti = np.array(predicti).squeeze()
-    # snr_RBF, evm_RBF = SNR(TxX_corr[taps // 2:-taps // 2 + 1], (np.array(predictr) + 1j * np.array(predicti)).squeeze())
-    bercount = BERcount(TxX_corr[taps // 2:-taps // 2 + 1], (np.array(predictr) + 1j * np.array(predicti)).squeeze(), parameter.pamorder)
-    # print(snr_RBF, evm_RBF)
-    # Histogram2D("RBF-Net", (np.array(predictr) + 1j * np.array(predicti)).squeeze(), Imageaddress, snr_RBF, evm_RBF)
-    Histogram2D("RBF-Net", (np.array(predictr) + 1j * np.array(predicti)).squeeze(), Imageaddress)
+    # taps = 31
+    # batch_size = 500
+    # LR = 1e-3
+    # EPOCH = 300
+    # overhead = 0.5
+    # trainnum = int(len(RxX_corr) * overhead)
+    # device = torch.device("cuda:0")
+    # train_inputr = rolling_window(torch.Tensor(RxX_corr.real), taps)[:trainnum]
+    # train_inputi = rolling_window(torch.Tensor(RxX_corr.imag), taps)[:trainnum]
+    # train_targetr = torch.Tensor(TxX_corr.real[taps // 2:-taps // 2 + 1])[:trainnum]
+    # train_targeti = torch.Tensor(TxX_corr.imag[taps // 2:-taps // 2 + 1])[:trainnum]
+    # train_tensor = Data.TensorDataset(train_inputr, train_inputi, train_targetr, train_targeti)
+    # train_loader = Data.DataLoader(train_tensor, batch_size=batch_size, shuffle=False)
+    #
+    # val_inputr = rolling_window(torch.Tensor(RxX_corr.real), taps)
+    # val_inputi = rolling_window(torch.Tensor(RxX_corr.imag), taps)
+    # val_targetr = torch.Tensor(TxX_corr.real[taps // 2:-taps // 2 + 1])
+    # val_targeti = torch.Tensor(TxX_corr.imag[taps // 2:-taps // 2 + 1])
+    # val_tensor = Data.TensorDataset(val_inputr, val_inputi, val_targetr, val_targeti)
+    # val_loader = Data.DataLoader(val_tensor, batch_size=batch_size, shuffle=False)
+    #
+    # layer_widths = [16, 16, 1]
+    # layer_centres = [16, 16]
+    # basis_func = gaussian
+    # final_modelr, final_modeli = Network(layer_widths, layer_centres, basis_func, taps).to(device), Network(
+    #     layer_widths, layer_centres, basis_func, taps).to(device)
+    # final_optr = torch.optim.Adam(final_modelr.parameters(), lr=LR)
+    # final_opti = torch.optim.Adam(final_modeli.parameters(), lr=LR)
+    # # modelx = conv1dResNet(Residual_Block, [2, 2, 2, 2]).to(device)
+    # # lossxr = nn.MSELoss()
+    # # lossxi = nn.MSELoss()
+    # # lossxc = nn.CrossEntropyLoss()
+    # # opty = torch.optim.Adam(modely.parameters(), weight_decay=1e-2, lr=LR)
+    # L = []
+    # val_L = []
+    # for epoch in tqdm(range(EPOCH)):
+    #     for i, (dr, di, txr, txi) in enumerate(train_loader):
+    #         final_modelr.train()
+    #         final_modeli.train()
+    #         outr, outi = final_modelr(dr.to(device)), final_modeli(di.to(device))
+    #         # outr,outi= final_modelr(dr.unsqueeze(1).to(device)),final_modeli(di.unsqueeze(1).to(device))
+    #         # trr,tri = harddecision(txr,txi)
+    #         Lossr = nn.MSELoss()(outr.squeeze().cpu(), torch.Tensor(txr))
+    #         Lossi = nn.MSELoss()(outi.squeeze().cpu(), torch.Tensor(txi))
+    #         Loss = Lossr + Lossi
+    #         final_optr.zero_grad()
+    #         Lossr.backward(retain_graph=True)
+    #         final_optr.step()
+    #         final_opti.zero_grad()
+    #         Lossi.backward()
+    #         final_opti.step()
+    #         L.append(Loss.detach().cpu().numpy())
+    #         # modely.eval()
+    #     print("Train Loss:{:.3f}".format(Loss),
+    #           '||' "Train Bercount:{:.3E}".format(BERcount(txr + 1j * txi, outr.cpu() + 1j * outi.cpu(), parameter.pamorder)))
+    #     # print('\n training Accx: %f\n training Accy: %f\n' % (np.mean(Accx), np.mean(Accy)))
+    #     # Accx = []
+    #     # # Accy = []
+    #     predictr, predicti = [], []
+    # final_modelr.eval()
+    # final_modeli.eval()
+    # for i, (dr, di, txr, txi) in enumerate(val_loader):
+    #     outr, outi = final_modelr(dr.to(device)), final_modeli(di.to(device))
+    #     predictr.extend(outr.cpu().detach().numpy())
+    #     predicti.extend(outi.cpu().detach().numpy())
+    #     # Lossxr = lossxr(outr.cpu(), txr)
+    #     # Lossxi = lossxi(outi.cpu(), txi)
+    #     # Lossyr = lossyr(outy[:, 0].cpu(), tyr)
+    #     # Lossyi = lossyi(outy[:, 1].cpu(), tyi)
+    #     # Lossxc = lossxc(outcx.cpu(), tgx)
+    #     # Lossyc = lossyc(outcy.cpu(), tgy)
+    #     # xacc = (tgx.eq(torch.max(outcx.cpu(), 1)[1])).sum() / outcx.shape[0]
+    #     # yacc = (tgy.eq(torch.max(outcy.cpu(), 1)[1])).sum() / outcy.shape[0]
+    #     print("Val BERcount:{:.3E}".format(BERcount(txr + 1j * txi, outr.cpu() + 1j * outi.cpu(), 4)))
+    # predictr = np.array(predictr).squeeze()
+    # predicti = np.array(predicti).squeeze()
+    # # snr_RBF, evm_RBF = SNR(TxX_corr[taps // 2:-taps // 2 + 1], (np.array(predictr) + 1j * np.array(predicti)).squeeze())
+    # bercount = BERcount(TxX_corr[taps // 2:-taps // 2 + 1], (np.array(predictr) + 1j * np.array(predicti)).squeeze(), parameter.pamorder)
+    # # print(snr_RBF, evm_RBF)
+    # # Histogram2D("RBF-Net", (np.array(predictr) + 1j * np.array(predicti)).squeeze(), Imageaddress, snr_RBF, evm_RBF)
+    # Histogram2D("RBF-Net", (np.array(predictr) + 1j * np.array(predicti)).squeeze(), Imageaddress)
 
 
