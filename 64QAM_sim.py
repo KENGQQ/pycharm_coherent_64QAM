@@ -30,9 +30,9 @@ from Equalizer import *
 #
 from tqdm import tqdm
 
-address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
-# address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
-folder = '20210427_DATA_OSNR/100KLW_1GFO_50GBW_0dBLO_sample32_500ns_CD320_EDC0_TxO-2dBm_RxO-08dBm_OSNR28dB_LO00dBm/'
+# address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
+address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
+folder = '20210427_DATA_OSNR/100KLW_1GFO_50GBW_0dBLO_sample32_500ns_CD640_EDC0_TxO-2dBm_RxO-08dBm_OSNR32dB_LO00dBm/'
 address += folder
 
 Imageaddress = address + 'image'
@@ -88,7 +88,7 @@ TxYI, TxYQ = QAM64_LogicTx(LogTxYI_LSB, LogTxYI_CSB, LogTxYI_MSB, LogTxYQ_LSB, L
 # Histogram2D('Tx_X_normalized', Tx_Signal_X, Imageaddress)
 # Histogram2D('Tx_X_normalized', Tx_Signal_Y, Imageaddress)
 
-eyestart, eyeend = 20,21
+eyestart, eyeend = 7, 8
 for eyepos in range(eyestart, eyeend, 1):
     down_num = eyepos
     # TxXI = downsample_Tx.return_value(Tx_XI[down_num:])
@@ -126,8 +126,9 @@ for eyepos in range(eyestart, eyeend, 1):
     # # Histogram2D("IQimba", Rx_X_iqimba[0])
     # Rx_Signal_X = np.reshape(Rx_X_iqimba, [Rx_X_iqimba.size,])
     # Rx_Signal_Y = np.reshape(Rx_Y_iqimba, [Rx_Y_iqimba.size,])
+    print("CD_tap_needed : {}".format( np.floor(16 * 40 * (1553e-9 ** 2) / 2 / 3e8 /  (1 / 128e9) ** 2) ))
     ##########IQimba################
-    tap_start, tap_end =41,43
+    tap_start, tap_end =55, 57
     for taps in range(tap_start, tap_end, 2):
         print("eye : {} ,tap : {}".format(eyepos,taps))
         # Rx_Signal_X_mat = sio.loadmat('RxX_mat.mat')
@@ -268,12 +269,12 @@ for eyepos in range(eyestart, eyeend, 1):
         print('BER_Y = {} \nSNR_Y = {} \nEVM_Y = {}'.format(bercount_Y, SNR_Y, EVM_Y))
         YSNR[eyepos], YEVM[eyepos] = SNR_Y, EVM_Y
 
-        print('----------------write excel----------------')
-        parameter_record = [eyepos, str(
-            [cma.mean, cma.type, cma.overhead*100, cma.cmataps, cma.stepsize, cma.iterator, cma.earlystop, cma.stepsizeadjust]),str([CMA_cost_X , CMA_cost_Y]),
-                            PLL_BW, str([(XIshift,XQshift) , (XI_corr ,XQ_corr )]),str([SNR_X ,EVM_X ,bercount_X]), str([(YIshift,YQshift) , (YI_corr ,YQ_corr )]),str([SNR_Y ,EVM_Y ,bercount_Y])]
-
-        write_excel(address, parameter_record)
+        # print('----------------write excel----------------')
+        # parameter_record = [eyepos, str(
+        #     [cma.mean, cma.type, cma.overhead*100, cma.cmataps, cma.stepsize, cma.iterator, cma.earlystop, cma.stepsizeadjust]),str([CMA_cost_X , CMA_cost_Y]),
+        #                     PLL_BW, str([(XIshift,XQshift) , (XI_corr ,XQ_corr )]),str([SNR_X ,EVM_X ,bercount_X]), str([(YIshift,YQshift) , (YI_corr ,YQ_corr )]),str([SNR_Y ,EVM_Y ,bercount_Y])]
+        #
+        # write_excel(address, parameter_record)
 
 
     # PN_Rx=ph.QAM_4(phasenoise_Rx,c1_radius=1.8,c2_radius=3.2)
