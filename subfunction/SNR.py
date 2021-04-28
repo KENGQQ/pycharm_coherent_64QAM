@@ -18,7 +18,8 @@ def SNR(pred, tg):
 
     EVM = round(EVM, 4)
     SNR = round(SNR, 4)
-    BER = 2 * (1 - 1 / 8) * math.erfc(np.sqrt(3 / 2 / (64 - 1) / EVM ** 2)) / np.log2(64)
+    # BER = 2 * (1 - 1 / 8) * math.erfc(np.sqrt(3 / 2 / (64 - 1) / (EVM*100) ** 2)) / np.log2(64)
 
 
-    return (SNR, EVM, BER)
+    # return (SNR, EVM, BER)
+    return (SNR, EVM)

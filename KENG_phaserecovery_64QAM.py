@@ -87,9 +87,9 @@ class KENG_phaserecovery:
         self.c3_radius_o = r3_o
         self.c9_radius_i = r9_i
         self.c9_radius_o = 12
-        # self.tap = 201
+        self.tap = 301
         # self.tap = 101
-        self.tap = 151
+        # self.tap = 151
 
 
         Rx_amplitude = np.abs(Rx)
@@ -116,6 +116,7 @@ class KENG_phaserecovery:
     def Rotation_algorithm(self, Rx):    #Carrier Phase Estimation Through the Rotation Algorithm for 64-QAM Optical Systems
 
         Rx_RA = Rx ** 4
+        self.Rx_RA_outside = Rx_RA
         c1_theta = cmath.phase(1 + 1j) - cmath.phase(1 + 1j)
         c2_theta = cmath.phase(1 + 1j) - cmath.phase(3 + 1j)
         c3_theta = cmath.phase(1 + 1j) - cmath.phase(1 + 1j)
@@ -138,17 +139,18 @@ class KENG_phaserecovery:
         # c3_radius_i = 0
         c3_radius_o = 500
         # c4_radius_i = 0
-        c4_radius_o = 930
+        c4_radius_o = 750
         # c5_radius_i = 0
-        c5_radius_o = 1950
+        c5_radius_o = 2050
         # c6_radius_i = 0
-        c6_radius_o = 3000
+        c6_radius_o = 2400
         # c7_radius_i = 0
-        c7_radius_o = 4550
+        c7_radius_o = 5200
+        # c7_radius_o = 4700
         # c8_radius_i = 0
-        c8_radius_o = 7000
+        c8_radius_o = 6300
         # c9_radius_i = 0
-        c9_radius_o = 100000
+        c9_radius_o = 16000
         # c10_radius_i = 0
         # c10_radius_o = 65
         radius_o = [c0_radius_o, c1_radius_o, c2_radius_o, c3_radius_o, c4_radius_o, c5_radius_o, c6_radius_o, c7_radius_o, c8_radius_o, c9_radius_o]
@@ -176,7 +178,7 @@ class KENG_phaserecovery:
                     break
 
         a = KENG_phaserecovery()
-        Rx_vv = a.first_QPSK(Rx_RA, tap = 51)
+        Rx_vv = a.first_QPSK(Rx_RA, tap = 201)
         phase1 = a.phase_adj
 
         Rx_ph = np.zeros(int(np.size(phase1)), dtype='complex_')
@@ -532,7 +534,8 @@ class KENG_phaserecovery:
 
     def PLL(self, isig):
         self.isig = isig
-        self.bandwidth = 2e-3
+        # self.bandwidth = 2e-3
+        self.bandwidth = 1e-7
         dampingfactor = 1430.707
 
         theta = self.bandwidth / (dampingfactor + 1 / (4 * dampingfactor))
