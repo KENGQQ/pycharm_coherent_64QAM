@@ -1,5 +1,6 @@
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
+from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
 import openpyxl
 import datetime
 import os
@@ -45,5 +46,12 @@ def write_excel(address, parameter_record):
     for i in range(len(parameter_record)):
         ws.cell(row=maxrow + 1, column=1, value=datetime.datetime.now())
         ws.cell(row=maxrow + 1, column=i + 2, value=parameter_record[i])
+
+
+    fill = PatternFill("solid", fgColor="d9b3ff")
+    if (parameter_record[5][8:12] == parameter_record[5][2:6] ):
+        for cell in list(ws.rows)[maxrow]:
+            cell.fill = fill
+
 
     wb.save(address + 'Record.xlsx')

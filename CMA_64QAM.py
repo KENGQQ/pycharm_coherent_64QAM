@@ -1018,8 +1018,10 @@ class CMA_single:
         self.rx_x_single = np.array(rx_x)
         self.rx_y_single = np.array(rx_y)
         self.datalength = len(rx_x)
-        #                      0    1      2    3     4        5      6        7        8      9    10    11
-        self.stepsizelist = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 6.409e-6, 1e-6, 2.025e-6 , 8e-7 , 1e-7, 1e-8, 1e9]
+        #                      0    1      2    3     4        5      6        7        8
+        self.stepsizelist = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 6.409e-6, 1e-6, 2.025e-6 , 8e-7 \
+        #      9    10    11    12      13
+            , 1e-7, 1e-8, 1e9, 1e-10, 5e-13, 1e-14, 1e-25]
         self.overhead = 1
         self.cmataps = taps
         self.center = int((self.cmataps - 1) / 2)
