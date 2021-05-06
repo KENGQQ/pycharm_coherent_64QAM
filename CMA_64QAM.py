@@ -1592,19 +1592,25 @@ class CMA_single:
         endtime = datetime.datetime.now()
         print(endtime - starttime)
 
-    def qam_4_side_RD_polarization(self, stage = 1):  # A FAMILY OF ALGORITHMS FOR BLIND EQUALIZATION OF QAM SIGNALS
+    def qam_4_side_RD(self, stage = 1):  # A FAMILY OF ALGORITHMS FOR BLIND EQUALIZATION OF QAM SIGNALS
         starttime = datetime.datetime.now()
-        self.type = 'single_side_RD_polarization'
-        self.costfunx = np.zeros((1, self.iterator), dtype="complex_")
+        self.type = 'single_side_RD'
+        self.costfunx = np.zeros((1, self.iterator))
+        self.costfuny = np.zeros((1, self.iterator))
         inputrx = self.rx_x_single
+        inputry = self.rx_y_single
         hxx = np.zeros(self.cmataps, dtype="complex_")
+        hyy = np.zeros(self.cmataps, dtype="complex_")
         hxx[self.center] = 1
+        hyy[self.center] = 1
         exout = np.zeros(self.datalength, dtype="complex_")
-        # errx = np.zeros(self.datalength, dtype="complex_")
-        cost_x = np.zeros(self.datalength, dtype="complex_")
+        eyout = np.zeros(self.datalength, dtype="complex_")
 
-        epsilon_lambda = 0.1  # forgetting factor
-        epsilon = 2  # initial
+        # errx = np.zeros(self.datalength, dtype="complex_")
+        # cost_x = np.zeros(self.datalength, dtype="complex_")
+        # cost_y = np.zeros(self.datalength, dtype="complex_")
+        cost_x = np.zeros(self.datalength)
+        cost_y = np.zeros(self.datalength)
 
         if stage == 3:
             radius = [2 ** 0.5, 10 ** 0.5, 18 ** 0.5, 26 ** 0.5, 34 ** 0.5, 50 ** 0.5, 58 ** 0.5, 74 ** 0.5, 98 ** 0.5]
@@ -1614,57 +1620,129 @@ class CMA_single:
             radius = [50 ** 0.5]
 
         HardDecision_X = np.zeros(len(radius))
+        HardDecision_Y = np.zeros(len(radius))
 
         for it in range(self.iterator):
             for indx in range(self.center, self.datalength - self.center):
-
                 exout[indx] = np.matmul(hxx, inputrx[indx - self.center:indx + self.center + 1])
-                if np.isnan(exout[indx]):
+                eyout[indx] = np.matmul(hyy, inputry[indx - self.center:indx + self.center + 1])
+
+                if np.isnan(exout[indx]) or np.isnan(eyout[indx]):
                     raise Exception("CMA Equaliser didn't converge at iterator {}".format(it))
 
                 for i in range(len(radius)):
                     HardDecision_X[i] = radius[i] - np.abs(exout[indx])
+                    HardDecision_Y[i] = radius[i] - np.abs(eyout[indx])
 
                 errx = (radius[np.argmin(abs(HardDecision_X))] ** 2 - np.abs(exout[indx]) ** 2) * (exout[indx])
-
-                # epsilon = epsilon_lambda * epsilon + (1 - epsilon_lambda) * (abs(radius[np.argmin(abs(HardDecision_X))]- np.abs(exout[indx]))) ** 2
-                # p = 7.1467 * (1 - np.exp(8 * epsilon - 0.24)) / (1 + np.exp(8 * epsilon - 0.24)) + 9.1467
-                # gamma = 2 ** (-p)
-                #
-                # if (radius[np.argmin(abs(HardDecision_X))] == radius[0]):
-                #     errx += gamma * ((radius[np.argmin(abs(HardDecision_X)) + 1] ** 2 - np.abs(exout[indx]) ** 2) * (exout[indx]))
-                # elif (radius[np.argmin(abs(HardDecision_X))] == radius[-1]):
-                #     errx += gamma * ((radius[np.argmin(abs(HardDecision_X)) - 1] ** 2 - np.abs(exout[indx]) ** 2) * (exout[indx]))
-                # else:
-                #     errx += gamma * ((radius[np.argmin(abs(HardDecision_X)) + 1] ** 2 - np.abs(exout[indx]) ** 2) * (exout[indx])) + \
-                #             gamma * ((radius[np.argmin(abs(HardDecision_X)) - 1] ** 2 - np.abs(exout[indx]) ** 2) * (exout[indx]))
+                erry = (radius[np.argmin(abs(HardDecision_Y))] ** 2 - np.abs(eyout[indx]) ** 2) * (eyout[indx])
 
                 hxx = hxx + self.stepsize_x * errx * np.conj(
                     inputrx[indx - self.center:indx + self.center + 1])
-
-                # cost_x[indx] = (np.abs(exout[indx]) - radius[np.argmin(abs(HardDecision_X))]) ** 2
+                hyy = hyy + self.stepsize_y * erry * np.conj(
+                    inputry[indx - self.center:indx + self.center + 1])
 
                 cost_x[indx] = (abs(exout[indx])) ** 2 - radius[np.argmin(abs(HardDecision_X))] ** 2
+                cost_y[indx] = (abs(eyout[indx])) ** 2 - radius[np.argmin(abs(HardDecision_Y))] ** 2
 
-            # self.costfunx[0][it] = np.mean(cost_x)
             self.costfunx[0][it] = np.mean(cost_x) * -1
+            self.costfuny[0][it] = np.mean(cost_y) * -1
+
             print('iteration = {}'.format(it))
             print(self.costfunx[0][it])
+            print(self.costfuny[0][it])
             print('-------')
 
             if it >= 1:
-                # if np.abs(self.costfunx[0][it] - self.costfunx[0][it - 1]) < self.earlystop * \
-                #         self.costfunx[0][it]:
-                #     print("Earlybreak at iterator {}".format(it))
-                #     break
                 if np.abs(self.costfunx[0][it] - self.costfunx[0][it - 1]) < (self.earlystop * 50):
                     self.stepsize_x *= self.stepsizeadjust
                     print('Stepsize_x adjust to {}'.format(self.stepsize_x))
-            #     if np.abs(self.costfuny[0][it] - self.costfuny[0][it - 1]) < self.earlystop:
-            #         self.stepsize_y *= self.stepsizeadjust
-            #         print('Stepsize_y adjust to {}'.format(self.stepsize_y))
+                if np.abs(self.costfuny[0][it] - self.costfuny[0][it - 1]) < (self.earlystop * 50):
+                    self.stepsize_y *= self.stepsizeadjust
+                    print('Stepsize_y adjust to {}'.format(self.stepsize_y))
 
         self.rx_x_cma = exout
+        self.rx_y_cma = eyout
+        endtime = datetime.datetime.now()
+        print(endtime - starttime)
+
+    def qam_4_butter_RD(self, stage = 1):  # A FAMILY OF ALGORITHMS FOR BLIND EQUALIZATION OF QAM SIGNALS
+        starttime = datetime.datetime.now()
+        self.type = 'butter_RD'
+        self.costfunx = np.zeros((1, self.iterator), dtype="complex_")
+        self.costfuny = np.zeros((1, self.iterator), dtype="complex_")
+        inputrx = self.rx_x_single
+        inputry = self.rx_y_single
+        hxx = np.zeros(self.cmataps, dtype="complex_")
+        hxy = np.zeros(self.cmataps, dtype="complex_")
+        hyx = np.zeros(self.cmataps, dtype="complex_")
+        hyy = np.zeros(self.cmataps, dtype="complex_")
+        hxx[self.center] = 1
+        hyy[self.center] = 1
+        exout = np.zeros(self.datalength, dtype="complex_")
+        eyout = np.zeros(self.datalength, dtype="complex_")
+
+        # errx = np.zeros(self.datalength, dtype="complex_")
+        cost_x = np.zeros(self.datalength, dtype="complex_")
+        cost_y = np.zeros(self.datalength, dtype="complex_")
+
+
+        if stage == 3:
+            radius = [2 ** 0.5, 10 ** 0.5, 18 ** 0.5, 26 ** 0.5, 34 ** 0.5, 50 ** 0.5, 58 ** 0.5, 74 ** 0.5, 98 ** 0.5]
+        elif stage == 2:
+            radius = [10 ** 0.5, 50 ** 0.5, 74 ** 0.5]
+        elif stage == 1:
+            radius = [50 ** 0.5]
+
+        HardDecision_X = np.zeros(len(radius))
+        HardDecision_Y = np.zeros(len(radius))
+
+        for it in range(self.iterator):
+            for indx in range(self.center, self.datalength - self.center):
+                exout[indx] = np.matmul(hxx, inputrx[indx - self.center:indx + self.center + 1]) + np.matmul(
+                    hxy, inputry[indx - self.center:indx + self.center + 1])
+                eyout[indx] = np.matmul(hyx, inputrx[indx - self.center:indx + self.center + 1]) + np.matmul(
+                    hyy, inputry[indx - self.center:indx + self.center + 1])
+                if np.isnan(exout[indx]) or np.isnan(eyout[indx]):
+                    raise Exception("CMA Equaliser didn't converge at iterator {}".format(it))
+
+                for i in range(len(radius)):
+                    HardDecision_X[i] = radius[i] - np.abs(exout[indx])
+                    HardDecision_Y[i] = radius[i] - np.abs(eyout[indx])
+
+                errx = (radius[np.argmin(abs(HardDecision_X))] ** 2 - np.abs(exout[indx]) ** 2) * (exout[indx])
+                erry = (radius[np.argmin(abs(HardDecision_Y))] ** 2 - np.abs(eyout[indx]) ** 2) * (eyout[indx])
+
+                hxx = hxx + self.stepsize_x * errx * np.conj(
+                    inputrx[indx - self.center:indx + self.center + 1])
+                hxy = hxy + self.stepsize_x * errx * np.conj(
+                    inputry[indx - self.center:indx + self.center + 1])
+                hyx = hyx + self.stepsize_y * erry * np.conj(
+                    inputrx[indx - self.center:indx + self.center + 1])
+                hyy = hyy + self.stepsize_y * erry * np.conj(
+                    inputry[indx - self.center:indx + self.center + 1])
+
+                cost_x[indx] = (abs(exout[indx])) ** 2 - radius[np.argmin(abs(HardDecision_X))] ** 2
+                cost_y[indx] = (abs(eyout[indx])) ** 2 - radius[np.argmin(abs(HardDecision_Y))] ** 2
+
+            self.costfunx[0][it] = np.mean(cost_x) * -1
+            self.costfuny[0][it] = np.mean(cost_y) * -1
+
+            print('iteration = {}'.format(it))
+            print(self.costfunx[0][it])
+            print(self.costfuny[0][it])
+            print('-------')
+
+            if it >= 1:
+                if np.abs(self.costfunx[0][it] - self.costfunx[0][it - 1]) < (self.earlystop * 100):
+                    self.stepsize_x *= self.stepsizeadjust
+                    print('Stepsize_x adjust to {}'.format(self.stepsize_x))
+                if np.abs(self.costfuny[0][it] - self.costfuny[0][it - 1]) < (self.earlystop * 100):
+                    self.stepsize_y *= self.stepsizeadjust
+                    print('Stepsize_y adjust to {}'.format(self.stepsize_y))
+
+        self.rx_x_cma = exout
+        self.rx_y_cma = eyout
         endtime = datetime.datetime.now()
         print(endtime - starttime)
 

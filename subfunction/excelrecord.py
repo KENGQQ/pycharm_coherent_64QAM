@@ -5,7 +5,6 @@ import openpyxl
 import datetime
 import os
 
-
 def open_excel(address):
     if not os.path.exists(address + 'Record.xlsx'):
         print('creat an excel file')
@@ -19,19 +18,32 @@ def open_excel(address):
 
     ws['A1'] = datetime.datetime.now()
 
-    parameter = ['eyepos', 'CMA[mean, type, overhead, taps, \nstepsize, iterator, earlystop, step_adj]', 'CMA [costX,costY]','PLL BW', 'VV radius','X_corr ',
-                 ' X[SNR,EVM,BERcount]','Y_corr ', 'Y[SNR,EVM,BERcount]']
+    parameter = ['eyepos', 'CMA[mean, type, overhead, earlystop, step_adj]', \
+                 'CMA1[taps, stepX, stepY, iter, cost]', 'CMA2[taps, stepX, stepY, iter, cost]', 'CMA3[taps, stepX, stepY, iter, cost]', \
+                  'PLL BW', 'VV radius', 'X_corr ',
+                 ' X[SNR,EVM,BERcount]', 'Y_corr ', 'Y[SNR,EVM,BERcount]']
 
     ws.column_dimensions['A'].width = 20.0
-    ws.column_dimensions['B'].width = 8.0
-    ws.column_dimensions['C'].width = 60.0
-    ws.column_dimensions['D'].width = 25.0
-    ws.column_dimensions['E'].width = 10.0
-    ws.column_dimensions['F'].width = 20.0
-    ws.column_dimensions['G'].width = 30.0
-    ws.column_dimensions['H'].width = 25.0
+    ws.column_dimensions['B'].width =  6.0
+    ws.column_dimensions['C'].width = 42.0
+    ws.column_dimensions['D'].width = 35.0
+    ws.column_dimensions['E'].width = 35.0
+    ws.column_dimensions['F'].width = 35.0
+    # ws.column_dimensions['G'].width = 25.0
+    # ws.column_dimensions['H'].width = 10.0
+    # ws.column_dimensions['I'].width = 20.0
+    # ws.column_dimensions['J'].width = 30.0
+    # ws.column_dimensions['K'].width = 25.0
+    # ws.column_dimensions['L'].width = 30.0
+    # ws.column_dimensions['M'].width = 25.0
+    ws.column_dimensions['G'].width = 10.0
+    ws.column_dimensions['H'].width = 20.0
     ws.column_dimensions['I'].width = 30.0
     ws.column_dimensions['J'].width = 25.0
+    ws.column_dimensions['K'].width = 30.0
+    ws.column_dimensions['L'].width = 25.0
+
+    ws.row_dimensions[1].height = 30
 
     for i in range(len(parameter)):
         ws.cell(row=1, column=i + 2, value=parameter[i])
@@ -47,11 +59,15 @@ def write_excel(address, parameter_record):
         ws.cell(row=maxrow + 1, column=1, value=datetime.datetime.now())
         ws.cell(row=maxrow + 1, column=i + 2, value=parameter_record[i])
 
-
+    print(parameter_record[9][2:6])
     fill = PatternFill("solid", fgColor="d9b3ff")
-    if (parameter_record[5][8:12] == parameter_record[5][2:6] ):
-        for cell in list(ws.rows)[maxrow]:
+    if (parameter_record[7][8:12] == parameter_record[7][2:6] ):
+        for cell in list(ws.rows)[maxrow][8 : 10]:
             cell.fill = fill
-
+    #
+    fill = PatternFill("solid", fgColor="88F1A1")
+    if (parameter_record[9][8:12] == parameter_record[9][2:6] ):
+        for cell in list(ws.rows)[maxrow][10 : 12]:
+            cell.fill = fill
 
     wb.save(address + 'Record.xlsx')
