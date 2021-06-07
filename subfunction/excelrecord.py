@@ -21,7 +21,7 @@ def open_excel(address):
     parameter = ['eyepos', 'CMA[mean, type, overhead, earlystop, step_adj]', \
                  'CMA1[taps, stepX, stepY, iter, cost]', 'CMA2[taps, stepX, stepY, iter, cost]', 'CMA3[taps, stepX, stepY, iter, cost]', \
                   'PLL BW', 'VV radius', 'X_corr ',
-                 ' X[SNR,EVM,BERcount]', 'Y_corr ', 'Y[SNR,EVM,BERcount]']
+                 ' X[SNR,EVM,BERcount]', 'Y_corr ', 'Y[SNR,EVM,BERcount]', 'corr vector(X, Y)']
 
     ws.column_dimensions['A'].width = 20.0
     ws.column_dimensions['B'].width =  6.0
@@ -29,19 +29,13 @@ def open_excel(address):
     ws.column_dimensions['D'].width = 35.0
     ws.column_dimensions['E'].width = 35.0
     ws.column_dimensions['F'].width = 35.0
-    # ws.column_dimensions['G'].width = 25.0
-    # ws.column_dimensions['H'].width = 10.0
-    # ws.column_dimensions['I'].width = 20.0
-    # ws.column_dimensions['J'].width = 30.0
-    # ws.column_dimensions['K'].width = 25.0
-    # ws.column_dimensions['L'].width = 30.0
-    # ws.column_dimensions['M'].width = 25.0
     ws.column_dimensions['G'].width = 10.0
     ws.column_dimensions['H'].width = 20.0
     ws.column_dimensions['I'].width = 30.0
     ws.column_dimensions['J'].width = 25.0
     ws.column_dimensions['K'].width = 30.0
     ws.column_dimensions['L'].width = 25.0
+    ws.column_dimensions['M'].width = 27.0
 
     ws.row_dimensions[1].height = 30
 
@@ -59,7 +53,6 @@ def write_excel(address, parameter_record):
         ws.cell(row=maxrow + 1, column=1, value=datetime.datetime.now())
         ws.cell(row=maxrow + 1, column=i + 2, value=parameter_record[i])
 
-    print(parameter_record[9][2:6])
     fill = PatternFill("solid", fgColor="d9b3ff")
     if (parameter_record[7][8:12] == parameter_record[7][2:6] ):
         for cell in list(ws.rows)[maxrow][8 : 10]:

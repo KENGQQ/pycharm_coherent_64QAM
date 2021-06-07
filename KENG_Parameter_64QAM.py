@@ -4,29 +4,29 @@ import pandas as pd
 
 
 class Parameter:
-    def __init__(self, datafolder, simulation=False):
+    def __init__(self, datafolder, symbolRate, pamorder, simulation=False,):
         if simulation == True:
-            self.symbolRate = 56e9
+            self.symbolRate = symbolRate
             self.sampleRate = 32 * self.symbolRate
             self.upsamplenum = 1
-            self.pamorder = 8
+            self.pamorder = pamorder
             self.Prbsnum = 13
             self.samplepersymbol = self.sampleRate / self.symbolRate
             self.resamplenumber = int(self.samplepersymbol * self.upsamplenum)
             self.datafolder=datafolder
-            time=500
-            # self.RxXI = pd.read_table(self.datafolder + 'RxXI.txt', names=['RxXI'])['RxXI'].tolist()
-            # self.RxXQ = pd.read_table(self.datafolder + 'RxXQ.txt', names=['RxXQ'])['RxXQ'].tolist()
-            # self.RxYI = pd.read_table(self.datafolder + 'RxYI.txt', names=['RxYI'])['RxYI'].tolist()
-            # self.RxYQ = pd.read_table(self.datafolder + 'RxYQ.txt', names=['RxYQ'])['RxYQ'].tolist()
+            # time=500
+            self.RxXI = pd.read_table(self.datafolder + 'RxXI_m.txt', names=['RxXI'])['RxXI'].tolist()
+            self.RxXQ = pd.read_table(self.datafolder + 'RxXQ_m.txt', names=['RxXQ'])['RxXQ'].tolist()
+            self.RxYI = pd.read_table(self.datafolder + 'RxYI_m.txt', names=['RxYI'])['RxYI'].tolist()
+            self.RxYQ = pd.read_table(self.datafolder + 'RxYQ_m.txt', names=['RxYQ'])['RxYQ'].tolist()
             # self.TxXI = pd.read_table(self.datafolder + 'TxXI.txt', names=['TxXI'])['TxXI'].tolist()
             # self.TxXQ = pd.read_table(self.datafolder + 'TxXQ.txt', names=['TxXQ'])['TxXQ'].tolist()
             # self.TxYI = pd.read_table(self.datafolder + 'TxYI.txt', names=['TxYI'])['TxYI'].tolist()
             # self.TxYQ = pd.read_table(self.datafolder + 'TxYQ.txt', names=['TxYQ'])['TxYQ'].tolist()
-            self.RxXI = np.mat(pd.read_table(self.datafolder + 'RxXI.txt', names=['RxXI'])['RxXI'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
-            self.RxXQ = np.mat(pd.read_table(self.datafolder + 'RxXQ.txt', names=['RxXQ'])['RxXQ'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
-            self.RxYI = np.mat(pd.read_table(self.datafolder + 'RxYI.txt', names=['RxYI'])['RxYI'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
-            self.RxYQ = np.mat(pd.read_table(self.datafolder + 'RxYQ.txt', names=['RxYQ'])['RxYQ'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
+            # self.RxXI = np.mat(pd.read_table(self.datafolder + 'RxXI.txt', names=['RxXI'])['RxXI'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
+            # self.RxXQ = np.mat(pd.read_table(self.datafolder + 'RxXQ.txt', names=['RxXQ'])['RxXQ'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
+            # self.RxYI = np.mat(pd.read_table(self.datafolder + 'RxYI.txt', names=['RxYI'])['RxYI'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
+            # self.RxYQ = np.mat(pd.read_table(self.datafolder + 'RxYQ.txt', names=['RxYQ'])['RxYQ'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
             # self.TxXI = np.mat(pd.read_table(self.datafolder + 'TxXI.txt', names=['TxXI'])['TxXI'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
             # self.TxXQ = np.mat(pd.read_table(self.datafolder + 'TxXQ.txt', names=['TxXQ'])['TxXQ'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
             # self.TxYI = np.mat(pd.read_table(self.datafolder + 'TxYI.txt', names=['TxYI'])['TxYI'],dtype='complex_').T[int(-time*self.sampleRate/1e9):,0]
@@ -34,9 +34,10 @@ class Parameter:
 
 
             self.datafolder = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
-            # self.datafolder = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
-            # self.datafolder += '20210307_DATA_base/'
-            self.datafolder += '20210322_DATA_ShortTime/'
+            self.datafolder = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
+            # self.datafolder += '20210307_DATA_base/'      # 2000ns
+            # self.datafolder += '20210322_DATA_ShortTime/' # 500ns
+            self.datafolder += '20210604_DATA_Bire/'        # 1000ns
             self.LogTxXI_LSB=pd.read_table(self.datafolder+'LogTxXI_LSB.txt',names=['L1'])['L1'].tolist()
             self.LogTxXI_CSB=pd.read_table(self.datafolder+'LogTxXI_CSB.txt',names=['L1'])['L1'].tolist()
             self.LogTxXI_MSB=pd.read_table(self.datafolder+'LogTxXI_MSB.txt',names=['L1'])['L1'].tolist()

@@ -86,10 +86,10 @@ class KENG_phaserecovery:
         self.c3_radius_i = r3_i
         self.c3_radius_o = r3_o
         self.c9_radius_i = r9_i
-        self.c9_radius_o = 12
-        self.tap = 301
+        self.c9_radius_o = 15
+        # self.tap = 301
         # self.tap = 101
-        # self.tap = 151
+        self.tap = 201
 
 
         Rx_amplitude = np.abs(Rx)
@@ -569,7 +569,7 @@ class KENG_phaserecovery:
         self.rx_recovery = self.rx_recovery[:, 1:]
         return self.rx_recovery
 
-    def FreqOffsetComp(self, rx, fsamp=56e9,fres=1e6):  # CoarseFrequencyOffset compensation based on prediogram method for M-QAM
+    def FreqOffsetComp(self, rx, fsamp=56e9,fres=1e7):  # CoarseFrequencyOffset compensation based on prediogram method for M-QAM
         fr = fres;
         fs = fsamp;
         m_order = 4;  # QAM is 4

@@ -165,3 +165,103 @@ class KENG_corr:
             self.shift = negative_shift
             self.corr = negative_max_corr
             return T_output, R_output, negative_max_corr
+
+
+    def corr_ex(self, Tx, Rx, Prbs):         #input should be complex
+        Rx = np.array(Rx)
+        Tx = np.array(Tx)
+        if Prbs == 15:
+            # print("Tx: PRBS15 data")
+            assert len(Tx) >= 2 ** 15 - 1, "TX length not enough"
+            Tx = Tx[:2 ** 15 - 1]
+            Tx_ = np.tile(Tx, 10)
+        if Prbs == 13:
+            # print("Tx :PRBS13 data")
+            assert len(Tx) >= 2 ** 13 - 1, "TX length not enough"
+            Tx = Tx[0:2 ** 13 - 1]
+            Tx_ = np.tile(Tx, 15)
+        output_length = 200000
+        window = self.window_length
+        start = 0
+        end = 8192
+        Tx_cor = Tx_[:window]
+        if end > Rx.size:
+            end = Rx.size
+        if window > Rx.size:
+            window = Rx.size
+
+        RxI = np.real(Rx)
+        RxQ = np.imag(Rx)
+
+        cal = ['RxI', '-RxI', 'RxQ', '-RxQ']
+
+        positive_cor_record_I = []
+        for indx in range(start, end):
+            c = np.corrcoef(RxI[indx:indx + window], Tx_cor)[0][1]
+            positive_cor_record_I.append(c)
+        positive_max_corr_I = np.max(positive_cor_record_I)
+        positive_max_corr_I = round(positive_max_corr_I, 4)
+        positive_shift_I = np.argmax(positive_cor_record_I)
+
+        negative_cor_record_I = []
+        for indx in range(start, end):
+            c = np.corrcoef(-RxI[indx:indx + window], Tx_cor)[0][1]
+            negative_cor_record_I.append(c)
+        negative_max_corr_I = np.max(negative_cor_record_I)
+        negative_max_corr_I = round(negative_max_corr_I, 4)
+        negative_shift_I = np.argmax(negative_cor_record_I)
+
+        positive_cor_record_Q = []
+        for indx in range(start, end):
+            c = np.corrcoef(RxQ[indx:indx + window], Tx_cor)[0][1]
+            positive_cor_record_Q.append(c)
+        positive_max_corr_Q = np.max(positive_cor_record_Q)
+        positive_max_corr_Q = round(positive_max_corr_Q, 4)
+        positive_shift_Q = np.argmax(positive_cor_record_Q)
+
+        negative_cor_record_Q = []
+        for indx in range(start, end):
+            c = np.corrcoef(-RxQ[indx:indx + window], Tx_cor)[0][1]
+            negative_cor_record_Q.append(c)
+        negative_max_corr_Q = np.max(negative_cor_record_Q)
+        negative_max_corr_Q = round(negative_max_corr_Q, 4)
+        negative_shift_Q = np.argmax(negative_cor_record_Q)
+
+        corr_value = [positive_max_corr_I, negative_max_corr_I, positive_max_corr_Q, negative_max_corr_Q]
+        corr_shift = [positive_shift_I, negative_shift_I, positive_shift_Q, negative_shift_Q]
+
+        max_corr = max(corr_value)
+        corr_shift = corr_shift[np.argmax(corr_value)]
+        print('corr value: {}'.format(max_corr))
+        print('Shift length : {}'.format(corr_shift))
+
+        if (max_corr == positive_max_corr_I):
+            if corr_shift + output_length > Rx.size:
+                R_output = RxI[corr_shift:]
+            else:
+                R_output = RxI[corr_shift:corr_shift + output_length]
+
+        elif (max_corr == negative_max_corr_I):
+            if corr_shift + output_length > Rx.size:
+                R_output = -RxI[corr_shift:]
+            else:
+                R_output = -RxI[corr_shift:corr_shift + output_length]
+
+        elif (max_corr == positive_max_corr_Q):
+            if corr_shift + output_length > Rx.size:
+                R_output = RxQ[corr_shift:]
+            else:
+                R_output = RxQ[corr_shift:corr_shift + output_length]
+
+        elif (max_corr == negative_max_corr_Q):
+            if corr_shift + output_length > Rx.size:
+                R_output = -RxQ[corr_shift:]
+            else:
+                R_output = -RxQ[corr_shift:corr_shift + output_length]
+
+        T_output = Tx_[:R_output.size]
+        self.shift = corr_shift
+        self.corr = max_corr
+        self.cal_vec = cal[np.argmax(corr_value)]
+        print('calculate {}'.format(self.cal_vec))
+        return T_output, R_output, max_corr
