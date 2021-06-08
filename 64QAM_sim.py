@@ -31,12 +31,12 @@ from Equalizer import *
 from tqdm import tqdm
 from CD_compensator import *
 
-# address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
-address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
-folder = '20210604_DATA_Bire/100KLW_1GFO_50GBW_0dBLO_sample32_500ns_CD-1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR38dB_LO00dBm_fiber_PMD_Bire/'
+address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
+# address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
+folder = '20210604_DATA_Bire/100KLW_1GFO_50GBW_0dBLO_sample32_1000ns_CD-1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm_fiber_PMD_Bire/'
 address += folder
 
-Imageaddress = address + 'image'
+Imageaddress = address + 'image2'
 parameter = Parameter(address, symbolRate=56e9, pamorder=8 ,simulation=True)
 # open_excel(address)
 ##################### control  #####################
@@ -51,11 +51,9 @@ iscomplexvolterra = 0
 ##################### intialize  #####################
 window_length = 7000
 # correlation_length = 110000
-# final_length = correlation_length - 9000
-correlation_length = 27000
+# correlation_length = 27000
+correlation_length = 55000
 final_length = correlation_length - 9000
-# correlation_length = 55000
-# final_length = correlation_length - 9000
 
 CMAstage1_tap, CMAstage1_stepsize_x, CMAstage1_stepsize_x, CMAstage1_iteration = 0, 0, 0, 0
 CMAstage2_tap, CMAstage2_stepsize_x, CMAstage2_stepsize_x, CMAstage2_iteration = 0, 0, 0, 0
@@ -184,17 +182,18 @@ for eyepos in range(eyestart, eyeend, 1):
             FOcompen_X = ph.FreqOffsetComp(Rx_X_CMA, fsamp=56e9, fres=1e5)
             if isplot == True: Histogram2D('KENG_FOcompensate_X', FOcompen_X, Imageaddress)
 
-            DDPLL_RxX = ph.PLL(FOcompen_X)
-            PLL_BW = ph.bandwidth
-            if isplot == True: Histogram2D('KENG_FreqOffset_X', DDPLL_RxX[0, :], Imageaddress)
+            # DDPLL_RxX = ph.PLL(FOcompen_X)
+            # PLL_BW = ph.bandwidth
+            # if isplot == True: Histogram2D('KENG_FreqOffset_X', DDPLL_RxX[0, :], Imageaddress)
 
+            DDPLL_RxX = FOcompen_X
             phasenoise_RxX = np.reshape(DDPLL_RxX, -1)
             PN_RxX = ph.QAM_64QAM_1(phasenoise_RxX, r1_o=1.55, r3_i=3.1, r3_o=3.47, r9_i=7.96)
             PN_RxX = PN_RxX[PN_RxX != 0]
             if isplot == True: Histogram2D('KENG_PhaseNoise_X', PN_RxX, Imageaddress)
 
             Rx_RA_X = ph.Rotation_algorithm(PN_RxX)
-            # if isplot == True: Histogram2D('KENG_PhaseNoise_X_RAstage', Rx_RA_X, Imageaddress)
+            if isplot == True: Histogram2D('KENG_PhaseNoise_X_RAstage', Rx_RA_X, Imageaddress)
             PN_RxX = Rx_RA_X
 
             Normal_ph_RxX_real, Normal_ph_RxX_imag = DataNormalize(np.real(PN_RxX), np.imag(PN_RxX), parameter.pamorder)

@@ -34,7 +34,7 @@ class Parameter:
 
 
             self.datafolder = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
-            self.datafolder = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
+            # self.datafolder = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
             # self.datafolder += '20210307_DATA_base/'      # 2000ns
             # self.datafolder += '20210322_DATA_ShortTime/' # 500ns
             self.datafolder += '20210604_DATA_Bire/'        # 1000ns

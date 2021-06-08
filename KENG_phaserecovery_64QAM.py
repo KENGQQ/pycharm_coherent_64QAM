@@ -87,9 +87,9 @@ class KENG_phaserecovery:
         self.c3_radius_o = r3_o
         self.c9_radius_i = r9_i
         self.c9_radius_o = 15
-        # self.tap = 301
+        self.tap = 301
         # self.tap = 101
-        self.tap = 201
+        # self.tap = 201
 
 
         Rx_amplitude = np.abs(Rx)
@@ -146,7 +146,6 @@ class KENG_phaserecovery:
         c6_radius_o = 2400
         # c7_radius_i = 0
         c7_radius_o = 5200
-        # c7_radius_o = 4700
         # c8_radius_i = 0
         c8_radius_o = 6300
         # c9_radius_i = 0
@@ -155,8 +154,6 @@ class KENG_phaserecovery:
         # c10_radius_o = 65
         radius_o = [c0_radius_o, c1_radius_o, c2_radius_o, c3_radius_o, c4_radius_o, c5_radius_o, c6_radius_o, c7_radius_o, c8_radius_o, c9_radius_o]
         # radius_o = [ c1_radius_o, c2_radius_o, c3_radius_o, c4_radius_o, c5_radius_o, c6_radius_o, c7_radius_o, c8_radius_o, c9_radius_o]
-
-        # aaa = [i for i in range(len(Rx_RA))]
 
         for i in range(len(Rx_RA)):
             for j in range(1, 6):
@@ -535,7 +532,7 @@ class KENG_phaserecovery:
     def PLL(self, isig):
         self.isig = isig
         # self.bandwidth = 2e-3
-        self.bandwidth = 1e-7
+        self.bandwidth = 1e-4
         dampingfactor = 1430.707
 
         theta = self.bandwidth / (dampingfactor + 1 / (4 * dampingfactor))
