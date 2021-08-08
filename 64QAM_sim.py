@@ -31,12 +31,12 @@ from Equalizer import *
 from tqdm import tqdm
 from CD_compensator import *
 
-# address = r'G:\KENG\GoogleCloud\OptsimData_coherent\QAM64_data/'
-address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
+address = r'C:\Users\keng\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
+# address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
 folder = '20210604_DATA_Bire/100KLW_1GFO_50GBW_0dBLO_sample32_1000ns_CD-1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm_fiber_PMD_Bire/'
 address += folder
 
-Imageaddress = address + 'image2'
+Imageaddress = address + 'image3'
 parameter = Parameter(address, symbolRate=56e9, pamorder=8,simulation=True)
 # open_excel(address)
 ##################### control  #####################
@@ -44,7 +44,7 @@ isplot = 1
 iswrite = 0
 xpart, ypart = 1, 1
 eyestart, eyeend, eyescan = 29, 30, 1
-tap1_start, tap1_end ,tap1_scan= 15, 17, 2 ;tap2_start, tap2_end, tap2_scan = 43, 45, 2;tap3_start, tap3_end, tap3_scan = 5, 7, 2
+tap1_start, tap1_end ,tap1_scan= 15, 17, 2 ;tap2_start, tap2_end, tap2_scan = 43, 45, 2;tap3_start, tap3_end, tap3_scan = 15, 17, 2
 cma_stage= [1, 2, 3]; cma_iter = [30, 10, 10]
 isrealvolterra = 0
 iscomplexvolterra = 0
@@ -119,6 +119,8 @@ for eyepos in range(eyestart, eyeend, 1):
     Rx_Signal_Y = RxYI + 1j * RxYQ
     # Histogram2D('Rx_X_origin_{}'.format(eyepos), Rx_Signal_X, Imageaddress)
     # Histogram2D('Rx_Y_origin_{}'.format(eyepos), Rx_Signal_Y, Imageaddress)
+    Histogram2D_thesis('Rx_X_origin_{}'.format(eyepos), Rx_Signal_X, Imageaddress)
+    Histogram2D_thesis('Rx_Y_origin_{}'.format(eyepos), Rx_Signal_Y, Imageaddress)
     #########IQimba################
     # Rx_Signal_X = np.reshape(Rx_Signal_X,(1,-1))
     # Rx_Signal_Y = np.reshape(Rx_Signal_Y,(1,-1))
@@ -188,8 +190,8 @@ for eyepos in range(eyestart, eyeend, 1):
 
             DDPLL_RxX = FOcompen_X
             phasenoise_RxX = np.reshape(DDPLL_RxX, -1)
-            # PN_RxX = ph.QAM_64QAM_1(phasenoise_RxX, r1_o=1.55, r3_i=3.1, r3_o=3.47, r9_i=7.96)
-            PN_RxX = ph.QAM_64QAM_1(phasenoise_RxX, r1_o=2.1, r3_i=19, r3_o=19.1, r9_i=19.2)
+            PN_RxX = ph.QAM_64QAM_1(phasenoise_RxX, r1_o=1.55, r3_i=3.1, r3_o=3.47, r9_i=7.96)
+            # PN_RxX = ph.QAM_64QAM_1(phasenoise_RxX, r1_o=2.1, r3_i=19, r3_o=19.1, r9_i=19.2)
             PN_RxX = PN_RxX[PN_RxX != 0]
             if isplot == True: Histogram2D('KENG_PhaseNoise_X', PN_RxX, Imageaddress)
 
@@ -281,8 +283,8 @@ for eyepos in range(eyestart, eyeend, 1):
     # np.save(address + 'YSNR', YSNR)
 # ===========================================volterra=========================================================
 if isrealvolterra == 1:
-    equalizer_real = Equalizer(np.real(np.array(TxX_corr)), np.real(np.array(RxX_corr)), 3, [31, 31, 31], 0.5)
-    equalizer_imag = Equalizer(np.imag(np.array(TxX_corr)), np.imag(np.array(RxX_corr)), 3, [31, 31, 31], 0.5)
+    equalizer_real = Equalizer(np.real(np.array(TxX_corr)), np.real(np.array(RxX_corr)), 3, [31, 31, 31], 0.2)
+    equalizer_imag = Equalizer(np.imag(np.array(TxX_corr)), np.imag(np.array(RxX_corr)), 3, [31, 31, 31], 0.2)
     Tx_volterra_real, Rx_volterra_real = equalizer_real.realvolterra()
     Tx_volterra_imag, Rx_volterra_imag = equalizer_imag.realvolterra()
     Tx_real_volterra = Tx_volterra_real + 1j * Tx_volterra_imag
