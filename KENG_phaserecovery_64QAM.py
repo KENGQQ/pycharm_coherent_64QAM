@@ -88,7 +88,6 @@ class KENG_phaserecovery:
         self.c9_radius_i = r9_i
         self.c9_radius_o = 15
         self.tap = 301
-        # self.tap = 101
         # self.tap = 201
 
 

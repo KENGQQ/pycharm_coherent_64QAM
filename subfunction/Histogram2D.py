@@ -155,7 +155,7 @@ def Histogram2D_thesis(filename, data, Image_Address, SNR=0, EVM=0, BERcount= 0)
             color='#F58518'
         )
     ))
-    fig.update_yaxes(range=[-11, 11],showticklabels=False)
+    fig.update_yaxes(range=[-8.7, 8.7],showticklabels=False)
     # fig.update_layout(
     # yaxis=dict(
     #     tickmode='array'
@@ -170,7 +170,7 @@ def Histogram2D_thesis(filename, data, Image_Address, SNR=0, EVM=0, BERcount= 0)
             color='#F58518'
         ),
     ))
-    fig.update_xaxes(range=[-11, 11], showticklabels=False)
+    fig.update_xaxes(range=[-8.7, 8.7], showticklabels=False)
     # fig.update_layout(
     # xaxis=dict(
     #     tickmode='array'
@@ -239,10 +239,10 @@ def Histogram2D_thesis(filename, data, Image_Address, SNR=0, EVM=0, BERcount= 0)
             size=25,
             color="Black")
     )
-    if SNR !=0 :
-        fig.update_layout(
-            xaxis_title="SNR : {}_EVM : {}_BERcount : {}".format(SNR, EVM, BERcount)
-        )
+    # if SNR !=0 :
+    #     fig.update_layout(
+    #         xaxis_title="SNR : {}_EVM : {}_BERcount : {}".format(SNR, EVM, BERcount)
+    #     )
 
         # fig.write_image(r"data\KENG_optsim_py\20201130_DATA_2Laser_final\noLW_1GFO_noNoise_80KM_initialphase225\image\{}.png".format(filename))
     fig.write_image(Image_Address + "\{}.png".format(filename))

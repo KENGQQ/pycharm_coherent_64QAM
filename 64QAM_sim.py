@@ -33,19 +33,19 @@ from CD_compensator import *
 
 address = r'C:\Users\keng\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
 # address = r'C:\Users\kengw\Google 雲端硬碟 (keng.eo08g@nctu.edu.tw)\OptsimData_coherent\QAM64_data/'
-folder = '20210604_DATA_Bire/100KLW_1GFO_50GBW_0dBLO_sample32_1000ns_CD-1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm_fiber_PMD_Bire/'
+folder = '20210808_thesis/500KLW_2GFO_50GBW_0dBLO_sample32_1000ns_CD-1280_EDC0_TxO-2dBm_RxO-08dBm_OSNR34dB_LO00dBm_fiber_PMD_Bire/'
 address += folder
 
-Imageaddress = address + 'image3'
+Imageaddress = address + 'image'
 parameter = Parameter(address, symbolRate=56e9, pamorder=8,simulation=True)
 # open_excel(address)
 ##################### control  #####################
-isplot = 1
+isplot = 0
 iswrite = 0
 xpart, ypart = 1, 1
-eyestart, eyeend, eyescan = 29, 30, 1
-tap1_start, tap1_end ,tap1_scan= 15, 17, 2 ;tap2_start, tap2_end, tap2_scan = 43, 45, 2;tap3_start, tap3_end, tap3_scan = 15, 17, 2
-cma_stage= [1, 2, 3]; cma_iter = [30, 10, 10]
+eyestart, eyeend, eyescan = 16, 17, 1
+tap1_start, tap1_end ,tap1_scan= 9, 11, 2 ;tap2_start, tap2_end, tap2_scan = 43, 45, 2;tap3_start, tap3_end, tap3_scan = 9, 11, 2
+cma_stage= [1, 2, 3]; cma_iter = [30, 10, 30]
 isrealvolterra = 0
 iscomplexvolterra = 0
 ##################### intialize  #####################
@@ -143,6 +143,7 @@ for eyepos in range(eyestart, eyeend, 1):
         CMAstage1_tap, CMAstage1_iteration, CMA_cost_X1, CMA_cost_Y1 = tap_1, cma_iter[0], np.round(cma.costfunx[0][-1], 4), np.round(cma.costfuny[0][-1], 4)
         if isplot == True:
             Histogram2D('CMA_X_{}_stage1 taps={} {}'.format(eyepos, cma.cmataps, cma.type), Rx_X_CMA_stage1, Imageaddress)
+            Histogram2D_thesis('CMA_X_{}_stage1 taps={} {}'.format(eyepos, cma.cmataps, cma.type), Rx_X_CMA_stage1, Imageaddress)
             Histogram2D('CMA_Y_{}_stage1 taps={} {}'.format(eyepos, cma.cmataps, cma.type), Rx_Y_CMA_stage1, Imageaddress)
         Rx_X_CMA = Rx_X_CMA_stage1
         Rx_Y_CMA = Rx_Y_CMA_stage1
@@ -172,6 +173,7 @@ for eyepos in range(eyestart, eyeend, 1):
             CMAstage3_tap, CMAstage3_iteration, CMA_cost_X3, CMA_cost_Y3 = taps_3, cma_iter[2], np.round(cma.costfunx[0][-1], 4), np.round(cma.costfuny[0][-1], 4)
             if isplot == True:
                 Histogram2D('CMA_X_{}_stage3 taps={} {}'.format(eyepos, cma.cmataps, cma.type), Rx_X_CMA_stage3, Imageaddress)
+                Histogram2D_thesis('CMA_X_{}_stage3 taps={} {}'.format(eyepos, cma.cmataps, cma.type), Rx_X_CMA_stage3, Imageaddress)
                 Histogram2D('CMA_Y_{}_stage3 taps={} {}'.format(eyepos, cma.cmataps, cma.type), Rx_Y_CMA_stage3, Imageaddress)
             Rx_X_CMA = Rx_X_CMA_stage3
             Rx_Y_CMA = Rx_Y_CMA_stage3
@@ -183,7 +185,7 @@ for eyepos in range(eyestart, eyeend, 1):
             ph = KENG_phaserecovery()
             FOcompen_X = ph.FreqOffsetComp(Rx_X_CMA, fsamp=56e9, fres=1e5)
             if isplot == True: Histogram2D('KENG_FOcompensate_X', FOcompen_X, Imageaddress)
-
+            Histogram2D_thesis('KENG_FOcompensate_X', FOcompen_X, Imageaddress)
             # DDPLL_RxX = ph.PLL(FOcompen_X)
             # PLL_BW = ph.bandwidth
             # if isplot == True: Histogram2D('KENG_FreqOffset_X', DDPLL_RxX[0, :], Imageaddress)
@@ -194,6 +196,7 @@ for eyepos in range(eyestart, eyeend, 1):
             # PN_RxX = ph.QAM_64QAM_1(phasenoise_RxX, r1_o=2.1, r3_i=19, r3_o=19.1, r9_i=19.2)
             PN_RxX = PN_RxX[PN_RxX != 0]
             if isplot == True: Histogram2D('KENG_PhaseNoise_X', PN_RxX, Imageaddress)
+            Histogram2D_thesis('KENG_PhaseNoise_X', PN_RxX, Imageaddress)
 
             Rx_RA_X = ph.Rotation_algorithm(PN_RxX)
             if isplot == True: Histogram2D('KENG_PhaseNoise_X_RAstage', Rx_RA_X, Imageaddress)
@@ -216,6 +219,7 @@ for eyepos in range(eyestart, eyeend, 1):
             print('BERcount_X = {} \nSNR_X = {} \nEVM_X = {}'.format(bercount_X, SNR_X, EVM_X))
             # XSNR[eyepos] ,XEVM[eyepos] = SNR_X, EVM_X
             if isplot == True: Histogram2D('KENG_X_beforeVol', RxX_corr, Imageaddress, SNR_X, EVM_X, bercount_X)
+            if isplot == True: Histogram2D_thesis('KENG_X_beforeVol', RxX_corr, Imageaddress, SNR_X, EVM_X, bercount_X)
 
         # --------------------------- Y PART------------------------
         if ypart == True:
@@ -298,15 +302,17 @@ if isrealvolterra == 1:
 
 # ------
 if iscomplexvolterra == 1:
-    equalizer_complex = Equalizer(np.array(TxY_corr), np.array(RxY_corr), 3, [31, 25, 25], 0.1)
+    equalizer_complex = Equalizer(np.array(TxX_corr), np.array(RxX_corr), 3, [31, 25, 25], 0.5)
     Tx_complex_volterra, Rx_complex_volterra = equalizer_complex.complexvolterra()
 
     snr_complexvolterra, evm_complexvolterra = SNR(Tx_complex_volterra, Rx_complex_volterra)
     print("SNR_cmplvol : {}, EVM_cmplvol : {}".format(snr_complexvolterra, evm_complexvolterra))
-    # Histogram2D("complexVolterra", Rx_complex_volterra, Imageaddress, snr_complexvolterra, evm_complexvolterra)
+    Histogram2D("complexVolterra", Rx_complex_volterra, Imageaddress, snr_complexvolterra, evm_complexvolterra)
+    Histogram2D_thesis("complexVolterra", Rx_complex_volterra, Imageaddress, snr_complexvolterra, evm_complexvolterra)
 
     compvol_bercount = BERcount(Tx_complex_volterra, Rx_complex_volterra, parameter.pamorder)
     print("BERcount_cmplvol : {}".format(compvol_bercount))
+
 
 # # #-----
 # # vol=KENG_volterra(Rx_corr,Tx_corr,[21,1,3],25000)
